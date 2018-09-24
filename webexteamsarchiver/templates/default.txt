@@ -1,0 +1,11 @@
+Title: {{ room.title }}
+Created by {{ room_creator.displayName }} ({{ room_creator.emails[0] }}) on {{ room.created }} and last had activity on {{ room.lastActivity }}.
+
+{% for msg in messages %}
+    {{- msg.created }} {{ msg.personEmail }}: {{ msg.text }}
+    {% if msg.files %}
+        {% for url in msg.files %}
+            {{- msg.created }} {{ msg.personEmail }}: Attachment: {{ files[url].filename }} ({{ files[url].content_length }} bytes, {{ files[url].content_type }})
+        {% endfor %}
+    {% endif %}
+{% endfor %}
