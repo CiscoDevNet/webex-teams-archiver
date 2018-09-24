@@ -9,9 +9,10 @@ Example:
 
     from webexteamsarchiver import WebexTeamsArchiver
 
-    archiver = WebexTeamsArchiver("ABCdefg")
+    personal_token = "ABCdefg"
+    archiver = WebexTeamsArchiver(personal_token)
     
-    room_id = "Y2lzY29zcGFyazovL3VzL1JPT00v",
+    room_id = "Y2lzY29zcGFyazovL3VzL1JPT00v"
     archiver.archive_room(room_id)
     
 Produces the following archive:
