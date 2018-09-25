@@ -2,3 +2,4 @@ webexteamssdk
 jinja2
 requests
 hurry.filesize
+bump2version
