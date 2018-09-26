@@ -25,6 +25,7 @@ import requests
 import os
 import shutil
 import tarfile
+import logging
 import concurrent.futures
 from collections import namedtuple
 from webexteamssdk import WebexTeamsAPI
@@ -36,6 +37,9 @@ __all__ = ['WebexTeamsArchiver', 'File']
 File = namedtuple("File",
                   ["content_disposition", "content_length",
                    "content_type", "filename"])
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 class WebexTeamsArchiver:
@@ -182,6 +186,8 @@ class WebexTeamsArchiver:
 
         if download_attachments:
             self._download_files(room_id, files, download_workers)
+
+        logger.info("Room %s archived successfully.", room_id)
 
     def _setup_folder(self, room_id, overwrite_folder, download_attachments, html_format):
         """Creates a folder `room_id` to store archive."""
