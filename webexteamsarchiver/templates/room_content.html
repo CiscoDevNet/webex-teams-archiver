@@ -1,13 +1,13 @@
 <div style="padding-left: 20px;">
     <h4>{{ room.title }}</h4>
-    Created by <a href="mailto:{{ room_creator.emails[0] }}" alt="{{ room_creator.id }}">{{ room_creator.displayName }}</a> on {{ room.created|datetime_format }} and last had activity on {{ room.lastActivity|datetime_format }}.<br />
+    Created by <a href="mailto:{{ room_creator.emails[0] }}" alt="{{ room_creator.id }}">{{ room_creator.displayName }}</a> on {{ room.created|datetime_format(timestamp_format) }} and last had activity on {{ room.lastActivity|datetime_format(timestamp_format) }}.<br />
 </div>
 <div>
     <div id="activity-items" tabindex="0" role="button" class="">
         {% for message in messages %}
         <div class="activity-item" data-group-pos="{% if loop.index-1 in repeat_indeces %}additional{% else %}start{% endif %}"><button class="cui-button cui-button--none avatar-wrapper activity-item-avatarWrapper" alt="{{ people[message.personEmail].displayName }} - {{ message.personEmail }}" type="button" aria-label="{{ people[message.personEmail].displayName }} - {{ message.personEmail }}" tabindex="0" title="{{ people[message.personEmail].displayName }} - {{ message.personEmail }}"><span class="cui-button__children" style="opacity: 1;"><div class="cui-avatar cui-avatar--36" title="{{ people[message.personEmail].displayName }} - {{ message.personEmail }}">{% if people[message.personEmail].avatar %}<img alt="" class="cui-avatar__img" draggable="false" src="{{ people[message.personEmail].avatar }}">{% else %}<span class="cui-avatar__letter">{{ people[message.personEmail].displayName|person_letters }}</span>{% endif %}</div></span></button><span class="file-title"></span>
             <div class="content">
-                <p class="meta"><span class="display-name" title="{{ people[message.personEmail].displayName }} - {{ message.personEmail }}">{{ people[message.personEmail].displayName }}</span><span class="mid-dot"></span><span class="published">{{ message.created|datetime_format }}</span></p>
+                <p class="meta"><span class="display-name" title="{{ people[message.personEmail].displayName }} - {{ message.personEmail }}">{{ people[message.personEmail].displayName }}</span><span class="mid-dot"></span><span class="published">{{ message.created|datetime_format(timestamp_format) }}</span></p>
                 {% if message.html %}<div class="activity-text">{{ message.html }}</div>{% else %}<div class="activity-text">{{ message.text|replace("\n", "<br/>") }}</div>{% endif %}
                 {% if message.files %}
                 <div class="share">

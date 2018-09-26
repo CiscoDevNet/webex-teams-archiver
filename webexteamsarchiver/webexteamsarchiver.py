@@ -30,10 +30,12 @@ from collections import namedtuple
 from webexteamssdk import WebexTeamsAPI
 from .jinja_env import env as jinja_env
 
+
 __all__ = ['WebexTeamsArchiver', 'File']
 
-File = namedtuple("File", 
-                  ["content_disposition", "content_length", "content_type", "filename"])
+File = namedtuple("File",
+                  ["content_disposition", "content_length",
+                   "content_type", "filename"])
 
 
 class WebexTeamsArchiver:
@@ -41,23 +43,25 @@ class WebexTeamsArchiver:
 
     Args:
         access_token: User's personal Webex Teams API bearer token.
-        
+
     Raises:
         webexteamssdkException: An error occurred calling the Webex Teams API.
     """
-    def __init__(self, access_token: str) -> None:
+    def __init__(self, access_token: str, single_request_timeout: int = 60) -> None:
         self.access_token = access_token
-        self.sdk = WebexTeamsAPI(self.access_token)
+        self.sdk = WebexTeamsAPI(self.access_token, single_request_timeout=single_request_timeout)
 
     def file_details(self, url: str) -> File:
         """Retrieves the file details using the Webex Teams attachments endpoint.
 
         Args:
             url: The URL of the file found in the files list in the message.
+            single_request_timeout: Webex API call single request timeout.
 
         Raises:
             requests.exceptions.RequestException: Error retrieving file details.
-            IndexError: Regex failure.
+            AttributeError: Response missing headers.
+            KeyError: Response header missing information.
         """
         
         headers = {
@@ -69,53 +73,55 @@ class WebexTeamsArchiver:
         
         filename_re = re.search(r"filename=\"(.+?)\"", r.headers["Content-Disposition"], re.I)
 
-        f = File(r.headers["Content-Disposition"], 
-                 r.headers["Content-Length"], 
-                 r.headers["Content-Type"],
-                 filename_re.group(1))
+        if not filename_re:
+            message = (
+                f"Failed to find filename='' in {r.headers['Content-Disposition']} for url {url}"
+            )
+            raise ValueError(message)
 
-        return f   
+        f = File(r.headers["Content-Disposition"], r.headers["Content-Length"], 
+                 r.headers["Content-Type"], filename_re.group(1))
 
-    def archive_room(self, room_id: str, overwrite_folder: bool = True, delete_folder: bool = False, 
-                     reverse_order: bool = True, download_attachments: bool = True, download_workers: int = 15, 
-                     text_format: bool = True, html_format: bool = True, timestamp_format: str = '%Y-%m-%dT%H:%M:%S') -> str:
-        """Archives a Webex Teams room. This creates a file called `room_id`.tgz with the following contents:
-                `room_id`.txt - Text version of the conversations (if `text_format` is True)
-                `room_id`.html - HTML version of the conversations (if `html_format` is True)
-                files/ - Attachments added to the room (if `download_attachments` is True)
+        return f  
+
+    def archive_room(self, room_id: str, overwrite_folder: bool = True, delete_folder: bool = False,
+                     reverse_order: bool = True, download_attachments: bool = True, 
+                     download_workers: int = 15, text_format: bool = True, html_format: bool = True,
+                     timestamp_format: str = '%Y-%m-%dT%H:%M:%S') -> None:
+        """Archives a Webex Teams room. This creates a file called 
+           `room_id`.tgz with the following contents:
+                `room_id`.txt - Text version of the conversations.
+                `room_id`.html - HTML version of the conversations.
+                files/ - Attachments added to the room.
 
         Args:
             room_id: ID of the room to archive.
-            overwrite_folder: Overwrite the archive folder if it already exists. Default: True.
-            delete_folder: Delete the archive folder when done. Default: False.
-            reverse_order: Order messages by most recent on the bottom. Default: True.
-            download_attachments: Download attachments sent to the room. Default: True.
-            download_workers: Number of download workers for downloading files. Default: 15.
-            text_format: Create a text version of the archive. Default: True.
-            html_format: Create an HTML version of the archive. Default: True.
-            timestamp_format: Timestamp strftime format. Default: %Y-%m-%dT%H:%M:%S
+            overwrite_folder: Overwrite the archive folder if it already exists.
+            delete_folder: Delete the archive folder when done.
+            reverse_order: Order messages by most recent on the bottom.
+            download_attachments: Download attachments sent to the room.
+            download_workers: Number of download workers for downloading files.
+            text_format: Create a text version of the archive.
+            html_format: Create an HTML version of the archive.
+            timestamp_format: Timestamp strftime format.
 
         Returns:
             A message saying the room has been archived.
 
         Raises:
-            IOError: An error occurred trying to create files/folders.
-            shutil.Error: Error occurred copying files or deleting the `room_id` folder on completion.
-            ValueError: If both `text_format` and `html_format` are False.
+            IOError: Error occurred while creating/writing to files.
+            shutil.Error: Error occurred creating/copying/deleting files/folders.
+            ValueError: Exception message will contain more details.
             webexteamssdkException: An error occurred calling the Webex Teams API.
         """
         
         if not text_format and not html_format:
             raise ValueError("At least one of text_format or html_format must be True.")
 
-        # Message timestamp format
-        def datetime_format(date, format=timestamp_format):
-            return date.strftime(format)
-        jinja_env.filters['datetime_format'] = datetime_format
-
         self._setup_folder(room_id, overwrite_folder, download_attachments, html_format)
         try:
-            self._archive(room_id, reverse_order, download_attachments, download_workers, text_format, html_format, timestamp_format)
+            self._archive(room_id, reverse_order, download_attachments, download_workers,
+                          text_format, html_format, timestamp_format)
             self._compress_folder(room_id)
         except Exception:
             self._tear_down_folder(room_id)
@@ -123,25 +129,32 @@ class WebexTeamsArchiver:
 
         if delete_folder:
             self._tear_down_folder(room_id)
-        
-        return "Room has been archived!"
 
-    def _archive(self, room_id, reverse_order, download_attachments, download_workers, text_format, html_format, timestamp_format):
-        """Collects room information, including attachments, using Webex Teams APIs and writes them to text/html files."""
+    def _archive(self, room_id, reverse_order, download_attachments,
+                 download_workers, text_format, html_format, timestamp_format):
+        """Collects room information, including attachments, using Webex Teams APIs and 
+        writes them to text/html files."""
 
         self._gather_room_information(room_id, reverse_order)
 
+        # {"email": webexteamssdk.PeopleAPI.Person}
         people = {}
+
+        # {"url": File}
         files = {}
+
         processed_messages = []
+
+        # Variables used to keep track if message is start or additional
         repeat_indeces = []
         previous_person_email = ""
-        previous_msg_datetime = ""
+        previous_msg_datetime = None
 
         for index, msg in enumerate(self.messages):
             processed_messages.append(msg)
 
-            if index > 0 and msg.personEmail == previous_person_email and (previous_msg_datetime-msg.created).seconds < 60:
+            if index > 0 and msg.personEmail == previous_person_email and \
+               (previous_msg_datetime-msg.created).seconds < 60:
                 repeat_indeces.append(index)
             
             previous_person_email = msg.personEmail
@@ -161,15 +174,15 @@ class WebexTeamsArchiver:
             processed_messages = list(reversed(processed_messages))
 
         if html_format:
-            self._create_html_transcript(room_id, processed_messages, files, people, repeat_indeces)
+            self._create_html_transcript(room_id, processed_messages, files, people,
+                                         repeat_indeces, timestamp_format)
 
         if text_format:
-            self._create_text_transcript(room_id, processed_messages, files)
+            self._create_text_transcript(room_id, processed_messages, files, timestamp_format)
 
         if download_attachments:
             self._download_files(room_id, files, download_workers)
 
-            
     def _setup_folder(self, room_id, overwrite_folder, download_attachments, html_format):
         """Creates a folder `room_id` to store archive."""
 
@@ -200,7 +213,7 @@ class WebexTeamsArchiver:
         self.room_creator = self.sdk.people.get(self.room.creatorId)
         self.messages = self.sdk.messages.list(room_id)
 
-    def _create_text_transcript(self, room_id, messages, files):
+    def _create_text_transcript(self, room_id, messages, files, timestamp_format):
         """Writes room messages to a text file."""
         
         template = jinja_env.get_template("default.txt")
@@ -209,14 +222,16 @@ class WebexTeamsArchiver:
             room_creator=self.room_creator,
             messages=messages,
             files=files,
-        ) 
+            timestamp_format=timestamp_format,
+        )
 
         with open(f"./{room_id}/{room_id}.txt", "w") as fh:
             fh.write(text_transcript)
 
-    def _create_html_transcript(self, room_id, messages, files, people, repeat_indeces):    
+    def _create_html_transcript(self, room_id, messages, files, people,
+                                repeat_indeces, timestamp_format):
         """Writes room messages to an HTML file."""
-        
+
         template = jinja_env.get_template("default.html")
         html = template.render(
             room=self.room,
@@ -225,8 +240,9 @@ class WebexTeamsArchiver:
             files=files,
             people=people,
             repeat_indeces=repeat_indeces,
-        ) 
-        
+            timestamp_format=timestamp_format
+        )
+
         with open(f"./{room_id}/{room_id}.html", "w") as fh:
             fh.write(html)
 
@@ -234,7 +250,10 @@ class WebexTeamsArchiver:
         """Downloads files given list of URLs."""
         
         with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
-            result = {executor.submit(self._download_file, room_id, url, files[url].filename): url for url in files}
+            result = {
+                executor.submit(self._download_file, room_id, 
+                                url, files[url].filename): url for url in files
+            }
             
             # Do this to check if any downloads failed.
             for future in concurrent.futures.as_completed(result):
@@ -242,12 +261,13 @@ class WebexTeamsArchiver:
 
     def _download_file(self, room_id, url, filename):
         """Download file from Webex Teams."""
-        
+
         headers = {
             "Authorization": f"Bearer {self.access_token}"
         }
 
-        # https://stackoverflow.com/questions/16694907/how-to-download-large-file-in-python-with-requests-py
+        # https://stackoverflow.com/questions/16694907/how-to-download-
+        # large-file-in-python-with-requests-py
         with requests.get(url, headers=headers, stream=True) as r:
             with open(f"./{room_id}/files/{filename}", 'wb') as f:
                 shutil.copyfileobj(r.raw, f)
@@ -255,6 +275,7 @@ class WebexTeamsArchiver:
     def _compress_folder(self, room_id):
         """Compress `room_id` folder as `room_id`.tgz"""
 
-        # https://stackoverflow.com/questions/2032403/how-to-create-full-compressed-tar-file-using-python
+        # https://stackoverflow.com/questions/2032403/how-to-create-
+        # full-compressed-tar-file-using-python
         with tarfile.open(f"{room_id}.tgz", "w:gz") as tar:
             tar.add(f"{room_id}")

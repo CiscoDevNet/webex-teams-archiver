@@ -37,6 +37,9 @@ def person_letters(display_name):
     
     return output
 
+def datetime_format(date, format):
+    return date.strftime(format)
+
 env = jinja2.Environment(
     autoescape=False,
     trim_blocks=True,
@@ -47,3 +50,4 @@ env = jinja2.Environment(
 
 env.filters['filesize_format'] = filesize_format
 env.filters['person_letters'] = person_letters
+env.filters['datetime_format'] = datetime_format
