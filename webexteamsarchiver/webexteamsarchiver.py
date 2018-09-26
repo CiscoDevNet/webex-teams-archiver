@@ -40,7 +40,7 @@ class WebexTeamsArchiver:
     """Initializes object that can be used to archive a Webex Teams room.
 
     Args:
-        access_token (str): User's personal Webex Teams API bearer token.
+        access_token: User's personal Webex Teams API bearer token.
         
     Raises:
         webexteamssdkException: An error occurred calling the Webex Teams API.
@@ -53,7 +53,7 @@ class WebexTeamsArchiver:
         """Retrieves the file details using the Webex Teams attachments endpoint.
 
         Args:
-            url (str): The URL of the file found in the files list in the message.
+            url: The URL of the file found in the files list in the message.
 
         Raises:
             requests.exceptions.RequestException: Error retrieving file details.
@@ -85,15 +85,15 @@ class WebexTeamsArchiver:
                 files/ - Attachments added to the room (if `download_attachments` is True)
 
         Args:
-            room_id (str): ID of the room to archive.
-            overwrite_folder (bool): Overwrite the archive folder if it already exists. Default: True.
-            delete_folder (bool): Delete the archive folder when done. Default: False.
-            reverse_order (bool): Order messages by most recent on the bottom. Default: True.
-            download_attachments (bool): Download attachments sent to the room. Default: True.
-            download_workers (int): Number of download workers for downloading files. Default: 15.
-            text_format (bool): Create a text version of the archive. Default: True.
-            html_format (bool): Create an HTML version of the archive. Default: True.
-            timestamp_format (str): Timestamp strftime format. Default: %Y-%m-%dT%H:%M:%S
+            room_id: ID of the room to archive.
+            overwrite_folder: Overwrite the archive folder if it already exists. Default: True.
+            delete_folder: Delete the archive folder when done. Default: False.
+            reverse_order: Order messages by most recent on the bottom. Default: True.
+            download_attachments: Download attachments sent to the room. Default: True.
+            download_workers: Number of download workers for downloading files. Default: 15.
+            text_format: Create a text version of the archive. Default: True.
+            html_format: Create an HTML version of the archive. Default: True.
+            timestamp_format: Timestamp strftime format. Default: %Y-%m-%dT%H:%M:%S
 
         Returns:
             A message saying the room has been archived.
