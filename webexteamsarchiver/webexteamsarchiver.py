@@ -29,6 +29,7 @@ import logging
 import concurrent.futures
 from collections import namedtuple
 from webexteamssdk import WebexTeamsAPI
+from webexteamssdk.exceptions import MalformedResponse
 from .jinja_env import env as jinja_env
 
 
@@ -66,6 +67,7 @@ class WebexTeamsArchiver:
             requests.exceptions.RequestException: Error retrieving file details.
             AttributeError: Response missing headers.
             KeyError: Response header missing information.
+            MalformedResponse: Webex Teams API response did not contain expected data.
         """
         
         headers = {
@@ -81,7 +83,7 @@ class WebexTeamsArchiver:
             message = (
                 f"Failed to find filename='' in {r.headers['Content-Disposition']} for url {url}"
             )
-            raise ValueError(message)
+            raise MalformedResponse(message)
 
         f = File(r.headers["Content-Disposition"], r.headers["Content-Length"], 
                  r.headers["Content-Type"], filename_re.group(1))
