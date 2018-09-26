@@ -124,7 +124,7 @@ class WebexTeamsArchiver:
 
         self._setup_folder(room_id, overwrite_folder, download_attachments, html_format)
         try:
-            self._archive(room_id, reverse_order, download_attachments, download_workers,
+            self._archive(room_id, reverse_order, download_attachments, download_workers, 
                           text_format, html_format, timestamp_format)
             self._compress_folder(room_id)
         except Exception:
@@ -134,9 +134,10 @@ class WebexTeamsArchiver:
         if delete_folder:
             self._tear_down_folder(room_id)
 
-    def _archive(self, room_id, reverse_order, download_attachments,
-                 download_workers, text_format, html_format, timestamp_format):
-        """Collects room information, including attachments, using Webex Teams APIs and 
+    def _archive(self, room_id: str, reverse_order: bool, download_attachments: bool,
+                 download_workers: int, text_format: bool, html_format: bool, 
+                 timestamp_format: str) -> None:
+        """Collects room messages and attachments using Webex Teams APIs and 
         writes them to text/html files."""
 
         self._gather_room_information(room_id, reverse_order)
@@ -189,7 +190,8 @@ class WebexTeamsArchiver:
 
         logger.info("Room %s archived successfully.", room_id)
 
-    def _setup_folder(self, room_id, overwrite_folder, download_attachments, html_format):
+    def _setup_folder(self, room_id: str, overwrite_folder: bool,
+                      download_attachments: bool, html_format: bool) -> None:
         """Creates a folder `room_id` to store archive."""
 
         if os.path.isdir(room_id) and overwrite_folder:
@@ -206,20 +208,21 @@ class WebexTeamsArchiver:
             shutil.copytree(f"{basepath}/static/css", f"{room_id}/css")
             shutil.copytree(f"{basepath}/static/fonts", f"{room_id}/fonts")
     
-    def _tear_down_folder(self, room_id):
+    def _tear_down_folder(self, room_id: str) -> None:
         """Deletes the `room_id` folder in case an exception was raised."""
         
         if os.path.isdir(room_id):
             shutil.rmtree(room_id, ignore_errors=False)
 
-    def _gather_room_information(self, room_id, reverse_order):
+    def _gather_room_information(self, room_id: str, reverse_order: bool) -> None:
         """Calls Webex Teams APIs to get room information and messages."""
         
         self.room = self.sdk.rooms.get(room_id)
         self.room_creator = self.sdk.people.get(self.room.creatorId)
         self.messages = self.sdk.messages.list(room_id)
 
-    def _create_text_transcript(self, room_id, messages, files, timestamp_format):
+    def _create_text_transcript(self, room_id: str, messages: list,
+                                files: dict, timestamp_format: str) -> None:
         """Writes room messages to a text file."""
         
         template = jinja_env.get_template("default.txt")
@@ -234,8 +237,8 @@ class WebexTeamsArchiver:
         with open(f"./{room_id}/{room_id}.txt", "w") as fh:
             fh.write(text_transcript)
 
-    def _create_html_transcript(self, room_id, messages, files, people,
-                                repeat_indeces, timestamp_format):
+    def _create_html_transcript(self, room_id: str, messages: list, files: dict, people: dict,
+                                repeat_indeces: list, timestamp_format: str) -> None:
         """Writes room messages to an HTML file."""
 
         template = jinja_env.get_template("default.html")
@@ -252,7 +255,7 @@ class WebexTeamsArchiver:
         with open(f"./{room_id}/{room_id}.html", "w") as fh:
             fh.write(html)
 
-    def _download_files(self, room_id, files, workers):
+    def _download_files(self, room_id: str, files: dict, workers: int) -> None:
         """Downloads files given list of URLs."""
         
         with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
@@ -265,7 +268,7 @@ class WebexTeamsArchiver:
             for future in concurrent.futures.as_completed(result):
                 future.result()
 
-    def _download_file(self, room_id, url, filename):
+    def _download_file(self, room_id: str, url: str, filename: str) -> None:
         """Download file from Webex Teams."""
 
         headers = {
@@ -278,7 +281,7 @@ class WebexTeamsArchiver:
             with open(f"./{room_id}/files/{filename}", 'wb') as f:
                 shutil.copyfileobj(r.raw, f)
 
-    def _compress_folder(self, room_id):
+    def _compress_folder(self, room_id: str) -> None:
         """Compress `room_id` folder as `room_id`.tgz"""
 
         # https://stackoverflow.com/questions/2032403/how-to-create-
