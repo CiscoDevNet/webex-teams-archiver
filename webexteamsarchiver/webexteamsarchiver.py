@@ -18,33 +18,30 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-
-
+import concurrent.futures
+import os
 import re
 import requests
-import os
 import shutil
 import tarfile
 import logging
-import concurrent.futures
 from collections import namedtuple
 from webexteamssdk import WebexTeamsAPI
 from webexteamssdk.exceptions import MalformedResponse
 from .jinja_env import env as jinja_env
 
-
 __all__ = ['WebexTeamsArchiver', 'File']
 
-File = namedtuple("File",
-                  ["content_disposition", "content_length",
-                   "content_type", "filename"])
+File = namedtuple(
+    "File", "content_disposition content_length content_type filename")
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
 class WebexTeamsArchiver:
-    """Initializes object that can be used to archive a Webex Teams room.
+    """
+    Initializes object that can be used to archive a Webex Teams room.
 
     Args:
         access_token: User's personal Webex Teams API bearer token.
@@ -57,7 +54,8 @@ class WebexTeamsArchiver:
         self.sdk = WebexTeamsAPI(self.access_token, single_request_timeout=single_request_timeout)
 
     def file_details(self, url: str) -> File:
-        """Retrieves the file details using the Webex Teams attachments endpoint.
+        """
+        Retrieves the file details using the Webex Teams attachments endpoint.
 
         Args:
             url: The URL of the file found in the files list in the message.
@@ -69,14 +67,14 @@ class WebexTeamsArchiver:
             KeyError: Response header missing information.
             MalformedResponse: Webex Teams API response did not contain expected data.
         """
-        
+
         headers = {
             "Authorization": f"Bearer {self.access_token}"
         }
 
         r = requests.head(url, headers=headers)
         r.raise_for_status()
-        
+
         filename_re = re.search(r"filename=\"(.+?)\"", r.headers["Content-Disposition"], re.I)
 
         if not filename_re:
@@ -85,20 +83,21 @@ class WebexTeamsArchiver:
             )
             raise MalformedResponse(message)
 
-        f = File(r.headers["Content-Disposition"], r.headers["Content-Length"], 
-                 r.headers["Content-Type"], filename_re.group(1))
-
-        return f  
+        return File(r.headers["Content-Disposition"],
+                    r.headers["Content-Length"],
+                    r.headers["Content-Type"],
+                    filename_re.group(1))
 
     def archive_room(self, room_id: str, overwrite_folder: bool = True, delete_folder: bool = False,
                      reverse_order: bool = True, download_attachments: bool = True, 
                      download_workers: int = 15, text_format: bool = True, html_format: bool = True,
                      timestamp_format: str = '%Y-%m-%dT%H:%M:%S') -> None:
-        """Archives a Webex Teams room. This creates a file called 
-           `room_id`.tgz with the following contents:
-                `room_id`.txt - Text version of the conversations.
-                `room_id`.html - HTML version of the conversations.
-                files/ - Attachments added to the room.
+        """
+        Archives a Webex Teams room. This creates a file called `room_id`.tgz 
+        with the following contents:
+        - `room_id`.txt - Text version of the conversations (if `text_format` is True)
+        - `room_id`.html - HTML version of the conversations (if `html_format` is True)
+        - files/ - Attachments added to the room (if `download_attachments` is True)
 
         Args:
             room_id: ID of the room to archive.
@@ -120,14 +119,15 @@ class WebexTeamsArchiver:
             ValueError: Exception message will contain more details.
             webexteamssdkException: An error occurred calling the Webex Teams API.
         """
-        
+
         if not text_format and not html_format:
             raise ValueError("At least one of text_format or html_format must be True.")
 
         self._setup_folder(room_id, overwrite_folder, download_attachments, html_format)
         try:
-            self._archive(room_id, reverse_order, download_attachments, download_workers, 
-                          text_format, html_format, timestamp_format)
+            self._archive(room_id, reverse_order, download_attachments, 
+                          download_workers, text_format, html_format, 
+                          timestamp_format)
             self._compress_folder(room_id)
         except Exception:
             self._tear_down_folder(room_id)
@@ -139,15 +139,17 @@ class WebexTeamsArchiver:
     def _archive(self, room_id: str, reverse_order: bool, download_attachments: bool,
                  download_workers: int, text_format: bool, html_format: bool, 
                  timestamp_format: str) -> None:
-        """Collects room messages and attachments using Webex Teams APIs and 
-        writes them to text/html files."""
+        """
+        Collects room messages and attachments using Webex Teams 
+        APIs and writes them to text/html files.
+        """
 
         self._gather_room_information(room_id, reverse_order)
 
-        # {"email": webexteamssdk.PeopleAPI.Person}
+        # Structure: {"personEmail": webexteamssdk.PeopleAPI.Person}
         people = {}
 
-        # {"url": File}
+        # Structure: {"url": File}
         files = {}
 
         processed_messages = []
@@ -163,7 +165,7 @@ class WebexTeamsArchiver:
             if index > 0 and msg.personEmail == previous_person_email and \
                (previous_msg_datetime-msg.created).seconds < 60:
                 repeat_indeces.append(index)
-            
+
             previous_person_email = msg.personEmail
             previous_msg_datetime = msg.created
 
@@ -198,7 +200,7 @@ class WebexTeamsArchiver:
 
         if os.path.isdir(room_id) and overwrite_folder:
             shutil.rmtree(room_id, ignore_errors=False)
-        
+
         os.makedirs(room_id)
 
         if download_attachments:
@@ -209,16 +211,16 @@ class WebexTeamsArchiver:
 
             shutil.copytree(f"{basepath}/static/css", f"{room_id}/css")
             shutil.copytree(f"{basepath}/static/fonts", f"{room_id}/fonts")
-    
+
     def _tear_down_folder(self, room_id: str) -> None:
         """Deletes the `room_id` folder in case an exception was raised."""
-        
+
         if os.path.isdir(room_id):
             shutil.rmtree(room_id, ignore_errors=False)
 
     def _gather_room_information(self, room_id: str, reverse_order: bool) -> None:
         """Calls Webex Teams APIs to get room information and messages."""
-        
+
         self.room = self.sdk.rooms.get(room_id)
         self.room_creator = self.sdk.people.get(self.room.creatorId)
         self.messages = self.sdk.messages.list(room_id)
@@ -226,7 +228,7 @@ class WebexTeamsArchiver:
     def _create_text_transcript(self, room_id: str, messages: list,
                                 files: dict, timestamp_format: str) -> None:
         """Writes room messages to a text file."""
-        
+
         template = jinja_env.get_template("default.txt")
         text_transcript = template.render(
             room=self.room,
@@ -259,13 +261,13 @@ class WebexTeamsArchiver:
 
     def _download_files(self, room_id: str, files: dict, workers: int) -> None:
         """Downloads files given list of URLs."""
-        
+
         with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
             result = {
                 executor.submit(self._download_file, room_id, 
                                 url, files[url].filename): url for url in files
             }
-            
+
             # Do this to check if any downloads failed.
             for future in concurrent.futures.as_completed(result):
                 future.result()

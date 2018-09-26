@@ -18,27 +18,31 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-
-
 import jinja2
+import datetime
 from hurry.filesize import size, alternative
+
+__all__ = ['env']
 
 
 def filesize_format(size_bytes):
     return size(int(size_bytes), system=alternative)
 
-def person_letters(display_name):
+
+def person_letters(display_name: str) -> str:
     output = ""
     for name in display_name.upper().split():
         output += name[0]
 
     if len(output) > 2:
         return f"{output[0]}{output[-1]}"
-    
+
     return output
 
-def datetime_format(date, format):
+
+def datetime_format(date: datetime, format: str) -> str:
     return date.strftime(format)
+
 
 env = jinja2.Environment(
     autoescape=False,
