@@ -94,7 +94,7 @@ Contribution
 
 webexteamsarchiver_ is a *community developed* project. Code contributions are welcome via PRs!
 
-*Copyright (c) 2016-2018 Cisco and/or its affiliates.*
+*Copyright (c) 2018 Cisco and/or its affiliates.*
 
 
 .. _webexteamsarchiver: https://github.com/CiscoDevNet/webex-teams-archiver
