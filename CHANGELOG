@@ -1,6 +1,33 @@
 CHANGELOG
 =========
 
-Sep 24, 2018
-------------
+0.2.1: 2018-09-26
+-----------------
+Fixes:
+- Changed spacing and line length to almost comply with PEP8.
+
+0.2.0: 2018-09-26
+-----------------
+Fixes:
+- More docstrings and type hints changes.
+- Moved datetime_format back to jinja_env to avoid changing global variable.
+
+New features:
+- Added logging support.
+
+0.1.0: 2018-09-25
+-----------------
+Fixes:
+- Fixed docstrings and type hints.
+- Remove async from methods that did not need to be asynchronous. 
+- Broken jinja template into multiple files to avoid the many levels of indentation.
+- Removed assertions in favor of type hints.
+
+New features:
+- Added support to compress folder on finish.
+- Added support for custom timestamp.
+- Replaced Webex Teams (unlicensed) CSS/fonts with collab-ui CSS/fonts (MIT).
+
+0.0.1: 2018-09-24
+-----------------
 First commit.
