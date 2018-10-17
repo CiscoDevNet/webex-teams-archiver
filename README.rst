@@ -39,6 +39,12 @@ Produces the following files:
     Y2lzY29zcGFyazovL3VzL1JPT00vd2ViZXh0ZWFtc2FyY2hpdmVy.txt
     files/
 
+Below is an example of a simple room that got archived.
+
+.. image:: sample.png
+   :scale: 40 %
+
+
 Note: The HTML version of the archive requires Internet connectivity because of CSS and avatars.
 
 Installation
