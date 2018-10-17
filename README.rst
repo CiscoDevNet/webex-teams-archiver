@@ -38,9 +38,8 @@ Produces the following files:
     Y2lzY29zcGFyazovL3VzL1JPT00vd2ViZXh0ZWFtc2FyY2hpdmVy.html
     Y2lzY29zcGFyazovL3VzL1JPT00vd2ViZXh0ZWFtc2FyY2hpdmVy.txt
     files/
-    css/
-    fonts/
 
+Note: The HTML version of the archive requires Internet connectivity because of CSS and avatars.
 
 Installation
 ------------
