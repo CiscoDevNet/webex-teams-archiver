@@ -73,7 +73,12 @@ class WebexTeamsArchiver:
         }
 
         r = requests.head(url, headers=headers)
+        # try:
         r.raise_for_status()
+        # except requests.exceptions.HTTPError as e:
+        #     if r.status_code == 404:
+        #         print(str(e).split()[-1])
+        #     return
 
         filename_re = re.search(r"filename=\"(.+?)\"", r.headers["Content-Disposition"], re.I)
 
@@ -178,6 +183,8 @@ class WebexTeamsArchiver:
                     if url not in files:
                         files[url] = file_metadata
 
+        # raise ValueError("Done")
+
         if reverse_order:
             repeat_indeces = [len(processed_messages)-i for i in repeat_indeces]
             processed_messages = list(reversed(processed_messages))
@@ -209,8 +216,8 @@ class WebexTeamsArchiver:
         if html_format:
             basepath = os.path.dirname(os.path.realpath(__file__))
 
-            shutil.copytree(f"{basepath}/static/css", f"{room_id}/css")
-            shutil.copytree(f"{basepath}/static/fonts", f"{room_id}/fonts")
+            shutil.copytree(f"{basepath}/static/.css", f"{room_id}/.css")
+            shutil.copytree(f"{basepath}/static/.fonts", f"{room_id}/.fonts")
 
     def _tear_down_folder(self, room_id: str) -> None:
         """Deletes the `room_id` folder in case an exception was raised."""
@@ -218,12 +225,15 @@ class WebexTeamsArchiver:
         if os.path.isdir(room_id):
             shutil.rmtree(room_id, ignore_errors=False)
 
-    def _gather_room_information(self, room_id: str, reverse_order: bool) -> None:
+    def _gather_room_information(self, room_id: str, reverse_order: bool, bot: bool = True) -> None:
         """Calls Webex Teams APIs to get room information and messages."""
 
         self.room = self.sdk.rooms.get(room_id)
         self.room_creator = self.sdk.people.get(self.room.creatorId)
-        self.messages = self.sdk.messages.list(room_id)
+        if bot:
+            self.messages = self.sdk.messages.list(room_id, mentionedPeople="me")
+        else:
+            self.messages = self.sdk.messages.list(room_id)
 
     def _create_text_transcript(self, room_id: str, messages: list,
                                 files: dict, timestamp_format: str) -> None:
