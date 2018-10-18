@@ -142,7 +142,7 @@ class WebexTeamsArchiver:
             self._tear_down_folder(room_id)
 
     def _archive(self, room_id: str, reverse_order: bool, download_attachments: bool,
-                 download_workers: int, text_format: bool, html_format: bool, 
+                 download_workers: int, text_format: bool, html_format: bool,
                  timestamp_format: str) -> None:
         """
         Collects room messages and attachments using Webex Teams 
@@ -225,12 +225,13 @@ class WebexTeamsArchiver:
         if os.path.isdir(room_id):
             shutil.rmtree(room_id, ignore_errors=False)
 
-    def _gather_room_information(self, room_id: str, reverse_order: bool, bot: bool = True) -> None:
+    def _gather_room_information(self, room_id: str, reverse_order: bool) -> None:
         """Calls Webex Teams APIs to get room information and messages."""
 
         self.room = self.sdk.rooms.get(room_id)
         self.room_creator = self.sdk.people.get(self.room.creatorId)
-        if bot:
+
+        if self.sdk.people.me().type == "bot":
             self.messages = self.sdk.messages.list(room_id, mentionedPeople="me")
         else:
             self.messages = self.sdk.messages.list(room_id)
