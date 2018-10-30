@@ -73,12 +73,7 @@ class WebexTeamsArchiver:
         }
 
         r = requests.head(url, headers=headers)
-        # try:
         r.raise_for_status()
-        # except requests.exceptions.HTTPError as e:
-        #     if r.status_code == 404:
-        #         print(str(e).split()[-1])
-        #     return
 
         filename_re = re.search(r"filename=\"(.+?)\"", r.headers["Content-Disposition"], re.I)
 
@@ -148,7 +143,6 @@ class WebexTeamsArchiver:
         Collects room messages and attachments using Webex Teams 
         APIs and writes them to text/html files.
         """
-
         self._gather_room_information(room_id, reverse_order)
 
         # Structure: {"personEmail": webexteamssdk.PeopleAPI.Person}
@@ -182,8 +176,6 @@ class WebexTeamsArchiver:
                     file_metadata = self.file_details(url)
                     if url not in files:
                         files[url] = file_metadata
-
-        # raise ValueError("Done")
 
         if reverse_order:
             repeat_indeces = [len(processed_messages)-i for i in repeat_indeces]
