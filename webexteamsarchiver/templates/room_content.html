@@ -5,7 +5,7 @@
 <div>
     <div id="activity-items" tabindex="0" role="button">
         {% for message in messages %}
-        <div class="activity-item" data-group-pos="{% if loop.index-1 in repeat_indeces %}additional{% else %}start{% endif %}"><button class="cui-button cui-button--none avatar-wrapper activity-item-avatarWrapper" alt="{{ people[message.personEmail].displayName }} - {{ message.personEmail }}" type="button" aria-label="{{ people[message.personEmail].displayName }} - {{ message.personEmail }}" tabindex="0" title="{{ people[message.personEmail].displayName }} - {{ message.personEmail }}"><span class="cui-button__children" style="opacity: 1;"><div class="cui-avatar cui-avatar--36" title="{{ people[message.personEmail].displayName }} - {{ message.personEmail }}">{% if people[message.personEmail].avatar %}<img alt="" class="cui-avatar__img" draggable="false" src="{{ people[message.personEmail].avatar }}">{% else %}<span class="cui-avatar__letter">{{ people[message.personEmail].displayName|person_letters }}</span>{% endif %}</div></span></button><span class="file-title"></span>
+        <div class="activity-item" data-group-pos="{% if loop.index-1 in repeat_indeces %}additional{% else %}start{% endif %}"><button class="cui-button cui-button--none avatar-wrapper activity-item-avatarWrapper" alt="{{ people[message.personEmail].displayName }} - {{ message.personEmail }}" type="button" aria-label="{{ people[message.personEmail].displayName }} - {{ message.personEmail }}" tabindex="0" title="{{ people[message.personEmail].displayName }} - {{ message.personEmail }}"><span class="cui-button__children" style="opacity: 1;"><div class="cui-avatar cui-avatar--36" title="{{ people[message.personEmail].displayName }} - {{ message.personEmail }}">{% if people[message.personEmail].avatar %}<img alt="" class="cui-avatar__img" draggable="false" src="{% if download_avatars %}./avatars/{{ message.personEmail|sanitize_filename }}{% else %}{{ people[message.personEmail].avatar }}{% endif %}">{% else %}<span class="cui-avatar__letter">{{ people[message.personEmail].displayName|person_letters }}</span>{% endif %}</div></span></button><span class="file-title"></span>
             <div class="content">
                 <p class="meta"><span class="display-name" title="{{ people[message.personEmail].displayName }} - {{ message.personEmail }}">{{ people[message.personEmail].displayName }}</span><span class="mid-dot"></span><span class="published">{{ message.created|datetime_format(timestamp_format) }}</span></p>
                 {% if message.html %}<div class="activity-text">{{ message.html }}</div>{% else %}<div class="activity-text">{{ message.text|replace("\n", "<br/>") }}</div>{% endif %}
@@ -13,27 +13,27 @@
                 <div class="share">
                     <ul class="shareList">
                         {% for url in message.files %}
-                            {% if files[url].content_type.startswith('image/') %}
+                            {% if attachments[url].content_type.startswith('image/') %}
                                 <li class="shareItem shareImage">
                                     <div class="activity-content-item-section">
                                         <div class="activity-content-item-image-holder" style="height: auto;">
                                             <div class="activity-content-item-image-wrapper">
-                                                <img alt="File" class="" draggable="false" src="./files/{{ files[url].filename }}" style="width: auto; height: auto;">
+                                                <img alt="File" class="" draggable="false" src="./attachments/{{ attachments[url].filename }}" style="width: auto; height: auto;">
                                             </div>
                                         </div>
                                         <div class="activity-content-item--hover">
-                                            <button class="activity-content-item-preview" title="Preview" href="./files/{{ files[url].filename }}" data-featherlight="image"><div class="activity-content-item-preview-text">Preview</div></button>
+                                            <button class="activity-content-item-preview" title="Preview" href="./attachments/{{ attachments[url].filename }}" data-featherlight="image"><div class="activity-content-item-preview-text">Preview</div></button>
                                             <div class="activity-content-item-info">
                                                 <div class="activity-content-item-meta">
-                                                    <div class="activity-content-item-meta-filename" title="{{ files[url].filename }}">{{ files[url].filename }}</div>
+                                                    <div class="activity-content-item-meta-filename" title="{{ attachments[url].filename }}">{{ attachments[url].filename }}</div>
                                                     <div class="activity-content-item-meta-secondary">
-                                                        <div class="activity-content-item-meta-size" title="{{ files[url].content_length }} bytes">{{ files[url].content_length|filesize_format }}</div>
+                                                        <div class="activity-content-item-meta-size" title="{{ attachments[url].content_length }} bytes">{{ attachments[url].content_length|filesize_format }}</div>
                                                         <div class="activity-content-item-meta-separator content-item-meta-separator"></div>
                                                         <div class="activity-content-item-meta-fileType" title="Image file">Image file</div>
                                                     </div>
                                                 </div>
                                                 <div class="activity-content-item-actions">
-                                                    <a download="{{ files[url].filename }}" href="./files/{{ files[url].filename }}">
+                                                    <a download="{{ attachments[url].filename }}" href="./attachments/{{ attachments[url].filename }}">
                                                         <span class="icon icon-download_24 activity-content-item-actions-button active" role="button" tabindex="0" title="Download"></span>
                                                     </a>
                                                 </div>
@@ -48,17 +48,17 @@
                                             <span class="icon icon-document_32"></span>
                                         </div>
                                         <div class="chip-info">
-                                            <span class="chip-text chip-text--primary" title="{{ files[url].filename }}">{{ files[url].filename }}</span>
-                                            <span class="chip-text chip-text--secondary" title="{{ files[url].content_type }}">
+                                            <span class="chip-text chip-text--primary" title="{{ attachments[url].filename }}">{{ attachments[url].filename }}</span>
+                                            <span class="chip-text chip-text--secondary" title="{{ attachments[url].content_type }}">
                                                 <div class="file-chip-secondary">
-                                                    <span class="file-chip-meta-size">{{ files[url].content_length|filesize_format }}</span>
+                                                    <span class="file-chip-meta-size">{{ attachments[url].content_length|filesize_format }}</span>
                                                     <span class="mid-dot"></span>
-                                                    <span class="file-chip-meta-fileType">{{ files[url].content_type }}</span>
+                                                    <span class="file-chip-meta-fileType">{{ attachments[url].content_type }}</span>
                                                 </div>
                                             </span>
                                         </div>
                                         <div class="chip-actions">
-                                            <a download="{{ files[url].filename }}" href="./files/{{ files[url].filename }}">
+                                            <a download="{{ attachments[url].filename }}" href="./attachments/{{ attachments[url].filename }}">
                                                 <span class="icon icon-download_24 chip-action chip-action-icon active" role="button" tabindex="0" title="Download"></span>
                                             </a> 
                                         </div>

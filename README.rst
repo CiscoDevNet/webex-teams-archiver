@@ -38,7 +38,8 @@ Produces the following files:
     $ ls Y2lzY29zcGFyazovL3VzL1JPT00vd2ViZXh0ZWFtc2FyY2hpdmVy/
     Y2lzY29zcGFyazovL3VzL1JPT00vd2ViZXh0ZWFtc2FyY2hpdmVy.html
     Y2lzY29zcGFyazovL3VzL1JPT00vd2ViZXh0ZWFtc2FyY2hpdmVy.txt
-    files/
+    attachments/
+    avatars/
 
 Below is an example of a simple room that got archived.
 
@@ -80,6 +81,8 @@ The `archive_room` method exposes the following options:
 | reverse_order        | True              | Order messages by most recent on the bottom       |
 +----------------------+-------------------+---------------------------------------------------+
 | download_attachments | True              | Download attachments sent to the room             |
++----------------------+-------------------+---------------------------------------------------+
+| download_avatars     | True              | Download avatar images                            |
 +----------------------+-------------------+---------------------------------------------------+
 | download_workers     | 15                | Number of download workers for downloading files  |
 +----------------------+-------------------+---------------------------------------------------+

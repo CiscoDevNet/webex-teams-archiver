@@ -22,7 +22,7 @@ import jinja2
 import datetime
 from hurry.filesize import size, alternative
 
-__all__ = ['env']
+__all__ = ['env', 'sanitize_filename']
 
 
 def filesize_format(size_bytes):
@@ -44,6 +44,10 @@ def datetime_format(date: datetime, format: str) -> str:
     return date.strftime(format)
 
 
+def sanitize_filename(email: str) -> str:
+    return ''.join(e for e in email if e.isalnum())
+
+
 env = jinja2.Environment(
     autoescape=False,
     trim_blocks=True,
@@ -55,3 +59,4 @@ env = jinja2.Environment(
 env.filters['filesize_format'] = filesize_format
 env.filters['person_letters'] = person_letters
 env.filters['datetime_format'] = datetime_format
+env.filters['sanitize_filename'] = sanitize_filename
