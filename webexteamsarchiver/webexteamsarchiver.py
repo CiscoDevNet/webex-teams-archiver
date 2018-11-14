@@ -241,7 +241,7 @@ class WebexTeamsArchiver:
             timestamp_format=timestamp_format,
         )
 
-        with open(f"./{room_id}/{room_id}.txt", "w") as fh:
+        with open(os.path.join(os.getcwd(), room_id, f"{room_id}.txt"), "w", encoding="utf-8") as fh:
             fh.write(text_transcript)
 
     def _create_html_transcript(self, room_id: str, messages: list, files: dict, people: dict,
@@ -259,7 +259,7 @@ class WebexTeamsArchiver:
             timestamp_format=timestamp_format
         )
 
-        with open(f"./{room_id}/{room_id}.html", "w") as fh:
+        with open(os.path.join(os.getcwd(), room_id, f"{room_id}.html"), "w", encoding="utf-8") as fh:
             fh.write(html)
 
     def _download_files(self, room_id: str, files: dict, workers: int) -> None:
@@ -285,7 +285,7 @@ class WebexTeamsArchiver:
         # https://stackoverflow.com/questions/16694907/how-to-download-
         # large-file-in-python-with-requests-py
         with requests.get(url, headers=headers, stream=True) as r:
-            with open(f"./{room_id}/files/{filename}", 'wb') as f:
+            with open(os.path.join(os.getcwd(), room_id, "files", f"{filename}"), "wb") as f:
                 shutil.copyfileobj(r.raw, f)
 
     def _compress_folder(self, room_id: str) -> None:
