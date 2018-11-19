@@ -27,14 +27,18 @@ import tarfile
 import logging
 from collections import namedtuple
 from webexteamssdk import WebexTeamsAPI
-from webexteamssdk.exceptions import MalformedResponse
+from webexteamssdk.exceptions import MalformedResponse, ApiError
 from .jinja_env import env as jinja_env
 from .jinja_env import sanitize_filename
 
-__all__ = ['WebexTeamsArchiver', 'File']
+__all__ = ['WebexTeamsArchiver', 'File', 'PersonNotFound']
 
 File = namedtuple(
     "File", "content_disposition content_length content_type filename")
+
+PersonNotFound = namedtuple(
+    "PersonNotFound", "id emails displayName avatar"
+)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -173,7 +177,18 @@ class WebexTeamsArchiver:
             previous_msg_datetime = msg.created
 
             if msg.personEmail not in people:
-                people[msg.personEmail] = self.sdk.people.get(msg.personId)
+                try:
+                    people[msg.personEmail] = self.sdk.people.get(msg.personId)
+                except ApiError as e:
+                    if e.response.status_code == 404:
+                        people[msg.personEmail] = PersonNotFound(
+                            id=msg.personId, 
+                            emails=[msg.personEmail],
+                            displayName="Person Not Found",
+                            avatar=None,
+                        )
+                    else:
+                        raise
 
                 if download_avatars and people[msg.personEmail].avatar:
                     avatars[people[msg.personEmail].avatar] = File(
@@ -235,7 +250,18 @@ class WebexTeamsArchiver:
         """Calls Webex Teams APIs to get room information and messages."""
 
         self.room = self.sdk.rooms.get(room_id)
-        self.room_creator = self.sdk.people.get(self.room.creatorId)
+        try:
+            self.room_creator = self.sdk.people.get(self.room.creatorId)
+        except ApiError as e:
+            if e.response.status_code == 404:
+                self.room_creator = PersonNotFound(
+                    id=self.room.creatorId, 
+                    emails=["unknown"],
+                    displayName="Person Not Found",
+                    avatar=None,
+                )
+            else:
+                raise
 
         if self.sdk.people.me().type == "bot":
             self.messages = self.sdk.messages.list(room_id, mentionedPeople="me")
