@@ -37,9 +37,11 @@ Produces the following files:
 
     $ ls Y2lzY29zcGFyazovL3VzL1JPT00vd2ViZXh0ZWFtc2FyY2hpdmVy/
     Y2lzY29zcGFyazovL3VzL1JPT00vd2ViZXh0ZWFtc2FyY2hpdmVy.html
+    Y2lzY29zcGFyazovL3VzL1JPT00vd2ViZXh0ZWFtc2FyY2hpdmVy.json
     Y2lzY29zcGFyazovL3VzL1JPT00vd2ViZXh0ZWFtc2FyY2hpdmVy.txt
     attachments/
     avatars/
+    space_details.json
 
 Below is an example of a simple room that got archived.
 
@@ -74,6 +76,19 @@ The `archive_room` method exposes the following options:
 +----------------------+-------------------+---------------------------------------------------+ 
 | Argument             | Default Value     | Description                                       | 
 +======================+===================+===================================================+
+| text_format          | True              | Create a text version of the archive              |
++----------------------+-------------------+---------------------------------------------------+
+| html_format          | True              | Create an HTML version of the archive             |
++----------------------+-------------------+---------------------------------------------------+
+| json_format          | True              | Create a JSON version of the archive              |
++----------------------+-------------------+---------------------------------------------------+
+
+
+In addition, the `options` kwargs supports the following options today:
+
++----------------------+-------------------+---------------------------------------------------+ 
+| Argument             | Default Value     | Description                                       | 
++======================+===================+===================================================+
 | overwrite_folder     | True              | Overwrite the archive folder if it already exists |
 +----------------------+-------------------+---------------------------------------------------+
 | delete_folder        | False             | Delete the archive folder when done               |
@@ -85,10 +100,6 @@ The `archive_room` method exposes the following options:
 | download_avatars     | True              | Download avatar images                            |
 +----------------------+-------------------+---------------------------------------------------+
 | download_workers     | 15                | Number of download workers for downloading files  |
-+----------------------+-------------------+---------------------------------------------------+
-| text_format          | True              | Create a text version of the archive              |
-+----------------------+-------------------+---------------------------------------------------+
-| html_format          | True              | Create an HTML version of the archive             |
 +----------------------+-------------------+---------------------------------------------------+
 | timestamp_format     | %Y-%m-%dT%H:%M:%S | Timestamp strftime format                         |
 +----------------------+-------------------+---------------------------------------------------+

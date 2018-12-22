@@ -25,19 +25,20 @@ import requests
 import shutil
 import tarfile
 import logging
+import json
 from collections import namedtuple
 from webexteamssdk import WebexTeamsAPI
 from webexteamssdk.exceptions import MalformedResponse, ApiError
 from .jinja_env import env as jinja_env
 from .jinja_env import sanitize_filename
 
-__all__ = ['WebexTeamsArchiver', 'File', 'PersonNotFound']
+__all__ = ['WebexTeamsArchiver', 'File', 'UserNotFound']
 
 File = namedtuple(
     "File", "content_disposition content_length content_type filename")
 
-PersonNotFound = namedtuple(
-    "PersonNotFound", "id emails displayName avatar"
+UserNotFound = namedtuple(
+    "UserNotFound", "id emails displayName avatar"
 )
 
 logger = logging.getLogger(__name__)
@@ -93,10 +94,8 @@ class WebexTeamsArchiver:
                     r.headers["Content-Type"],
                     filename_re.group(1))
 
-    def archive_room(self, room_id: str, overwrite_folder: bool = True, delete_folder: bool = False,
-                     reverse_order: bool = True, download_attachments: bool = True,
-                     download_avatars: bool = True, download_workers: int = 15, text_format: bool = True,
-                     html_format: bool = True, timestamp_format: str = '%Y-%m-%dT%H:%M:%S') -> None:
+    def archive_room(self, room_id: str, text_format: bool = True, html_format: bool = True,
+                     json_format: bool = True, **options) -> None:
         """
         Archives a Webex Teams room. This creates a file called `room_id`.tgz 
         with the following contents:
@@ -106,33 +105,47 @@ class WebexTeamsArchiver:
 
         Args:
             room_id: ID of the room to archive.
-            overwrite_folder: Overwrite the archive folder if it already exists.
-            delete_folder: Delete the archive folder when done.
-            reverse_order: Order messages by most recent on the bottom.
-            download_attachments: Download attachments sent to the room.
-            download_avatars: Download avatar images.
-            download_workers: Number of download workers for downloading files.
             text_format: Create a text version of the archive.
             html_format: Create an HTML version of the archive.
-            timestamp_format: Timestamp strftime format.
+            json_format: Create a json version of the archive.
+
+            Options:
+                overwrite_folder: Overwrite the archive folder if it already exists.
+                delete_folder: Delete the archive folder when done.
+                reverse_order: Order messages by most recent on the bottom.
+                download_attachments: Download attachments sent to the room.
+                download_avatars: Download avatar images.
+                download_workers: Number of download workers for downloading files.
+                timestamp_format: Timestamp strftime format.
 
         Returns:
-            A message saying the room has been archived.
+            None
 
         Raises:
             IOError: Error occurred while creating/writing to files.
             shutil.Error: Error occurred creating/copying/deleting files/folders.
             ValueError: Exception message will contain more details.
+            TypeError: Messages contained non JSON serializable data.
             webexteamssdkException: An error occurred calling the Webex Teams API.
         """
 
-        if not text_format and not html_format:
-            raise ValueError("At least one of text_format or html_format must be True.")
+        if not (text_format or html_format or json_format):
+            raise ValueError("At least one of text_format, html_format, or json_format must be True.")
 
+        # Configure options
+        overwrite_folder = options.get("overwrite_folder", True)
+        delete_folder = options.get("delete_folder", False)
+        reverse_order = options.get("reverse_order", True)
+        download_attachments = options.get("download_attachments", True)
+        download_avatars = options.get("download_avatars", True)
+        download_workers = options.get("download_workers", 15)
+        timestamp_format = options.get("timestamp_format", "%Y-%m-%dT%H:%M:%S")
+
+        # Prepare folder
         self._setup_folder(room_id, overwrite_folder, download_attachments, download_avatars, html_format)
         try:
             self._archive(room_id, reverse_order, download_attachments, download_avatars,
-                          download_workers, text_format, html_format, timestamp_format)
+                          download_workers, text_format, html_format, json_format, timestamp_format)
             self._compress_folder(room_id)
         except Exception:
             self._tear_down_folder(room_id)
@@ -143,12 +156,12 @@ class WebexTeamsArchiver:
 
     def _archive(self, room_id: str, reverse_order: bool, download_attachments: bool,
                  download_avatars: bool, download_workers: int, text_format: bool, 
-                 html_format: bool, timestamp_format: str) -> None:
+                 html_format: bool, json_format: bool, timestamp_format: str) -> None:
         """
         Collects room messages and attachments using Webex Teams 
         APIs and writes them to text/html files.
         """
-        self._gather_room_information(room_id, reverse_order)
+        self._gather_room_information(room_id)
 
         # Structure: {"personEmail": webexteamssdk.PeopleAPI.Person}
         people = {}
@@ -181,7 +194,7 @@ class WebexTeamsArchiver:
                     people[msg.personEmail] = self.sdk.people.get(msg.personId)
                 except ApiError as e:
                     if e.response.status_code == 404:
-                        people[msg.personEmail] = PersonNotFound(
+                        people[msg.personEmail] = UserNotFound(
                             id=msg.personId, 
                             emails=[msg.personEmail],
                             displayName="Person Not Found",
@@ -217,6 +230,13 @@ class WebexTeamsArchiver:
         if download_avatars:
             self._download_files(room_id, "avatars", avatars, download_workers)
 
+        if json_format:
+            self._create_json_transcript(room_id, processed_messages)
+
+        # Write space information to json file
+        with open(os.path.join(os.getcwd(), room_id, f"space_details.json"), "w", encoding="utf-8") as fh:
+            json.dump(self.room.to_dict(), fh)
+
         logger.info("Room %s archived successfully.", room_id)
 
     def _setup_folder(self, room_id: str, overwrite_folder: bool, download_attachments: bool,
@@ -246,7 +266,7 @@ class WebexTeamsArchiver:
         if os.path.isdir(room_id):
             shutil.rmtree(room_id, ignore_errors=False)
 
-    def _gather_room_information(self, room_id: str, reverse_order: bool) -> None:
+    def _gather_room_information(self, room_id: str) -> None:
         """Calls Webex Teams APIs to get room information and messages."""
 
         self.room = self.sdk.rooms.get(room_id)
@@ -254,8 +274,8 @@ class WebexTeamsArchiver:
             self.room_creator = self.sdk.people.get(self.room.creatorId)
         except ApiError as e:
             if e.response.status_code == 404:
-                self.room_creator = PersonNotFound(
-                    id=self.room.creatorId, 
+                self.room_creator = UserNotFound(
+                    id=self.room.creatorId,
                     emails=["unknown"],
                     displayName="Person Not Found",
                     avatar=None,
@@ -283,6 +303,15 @@ class WebexTeamsArchiver:
 
         with open(os.path.join(os.getcwd(), room_id, f"{room_id}.txt"), "w", encoding="utf-8") as fh:
             fh.write(text_transcript)
+
+    def _create_json_transcript(self, room_id: str, messages: list) -> None:
+        """Writes room messages to a JSON file."""
+
+        data = {
+            "items": [m.to_dict() for m in messages]
+        }
+        with open(os.path.join(os.getcwd(), room_id, f"{room_id}.json"), "w", encoding="utf-8") as fh:
+            json.dump(data, fh)
 
     def _create_html_transcript(self, room_id: str, messages: list, attachments: dict, people: dict,
                                 download_avatars: dict, repeat_indeces: list, timestamp_format: str) -> None:
