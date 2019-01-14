@@ -17,6 +17,9 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+Please note that use of the Webex Teams Archiver may violate the retention policy, 
+if any, applicable to your use of Webex Teams.
 """
 import concurrent.futures
 import os
@@ -72,26 +75,35 @@ class WebexTeamsArchiver:
             AttributeError: Response missing headers.
             KeyError: Response header missing information.
             MalformedResponse: Webex Teams API response did not contain expected data.
+
+        Returns:
+            None: The file no longer exists.
+            File: Details about the file.
         """
 
         headers = {
-            "Authorization": f"Bearer {self.access_token}"
+            "Authorization": f"Bearer {self.access_token}",
+            "Accept-Encoding": "",
         }
 
         r = requests.head(url, headers=headers)
+        if r.status_code == 404:
+            # Item must have been deleted since url was retrieved
+            return None
+
         r.raise_for_status()
 
-        filename_re = re.search(r"filename=\"(.+?)\"", r.headers["Content-Disposition"], re.I)
+        filename_re = re.search(r"filename=\"(.+?)\"", r.headers.get("Content-Disposition", ""), re.I)
 
         if not filename_re:
             message = (
-                f"Failed to find filename='' in {r.headers['Content-Disposition']} for url {url}"
+                f"Failed to find filename='' in {r.headers.get('Content-Disposition', '')} for url {url}"
             )
             raise MalformedResponse(message)
 
-        return File(r.headers["Content-Disposition"],
-                    r.headers["Content-Length"],
-                    r.headers["Content-Type"],
+        return File(r.headers.get("Content-Disposition", ""),
+                    r.headers.get("Content-Length", 0),
+                    r.headers.get("Content-Type", ""),
                     filename_re.group(1))
 
     def archive_room(self, room_id: str, text_format: bool = True, html_format: bool = True,
@@ -195,7 +207,7 @@ class WebexTeamsArchiver:
                 except ApiError as e:
                     if e.response.status_code == 404:
                         people[msg.personEmail] = UserNotFound(
-                            id=msg.personId, 
+                            id=msg.personId,
                             emails=[msg.personEmail],
                             displayName="Person Not Found",
                             avatar=None,
@@ -210,7 +222,7 @@ class WebexTeamsArchiver:
             if msg.files:
                 for url in msg.files:
                     file_metadata = self.file_details(url)
-                    if url not in attachments:
+                    if file_metadata and url not in attachments:
                         attachments[url] = file_metadata
 
         if reverse_order:

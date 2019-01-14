@@ -13,57 +13,59 @@
                 <div class="share">
                     <ul class="shareList">
                         {% for url in message.files %}
-                            {% if attachments[url].content_type.startswith('image/') %}
-                                <li class="shareItem shareImage">
-                                    <div class="activity-content-item-section">
-                                        <div class="activity-content-item-image-holder" style="height: auto;">
-                                            <div class="activity-content-item-image-wrapper">
-                                                <img alt="File" class="" draggable="false" src="./attachments/{{ attachments[url].filename }}" style="width: auto; height: auto;">
+                            {% if url in attachments %}
+                                {% if attachments[url].content_type.startswith('image/') %}
+                                    <li class="shareItem shareImage">
+                                        <div class="activity-content-item-section">
+                                            <div class="activity-content-item-image-holder" style="height: auto;">
+                                                <div class="activity-content-item-image-wrapper">
+                                                    <img alt="File" class="" draggable="false" src="./attachments/{{ attachments[url].filename }}" style="width: auto; height: auto;">
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="activity-content-item--hover">
-                                            <button class="activity-content-item-preview" title="Preview" href="./attachments/{{ attachments[url].filename }}" data-featherlight="image"><div class="activity-content-item-preview-text">Preview</div></button>
-                                            <div class="activity-content-item-info">
-                                                <div class="activity-content-item-meta">
-                                                    <div class="activity-content-item-meta-filename" title="{{ attachments[url].filename }}">{{ attachments[url].filename }}</div>
-                                                    <div class="activity-content-item-meta-secondary">
-                                                        <div class="activity-content-item-meta-size" title="{{ attachments[url].content_length }} bytes">{{ attachments[url].content_length|filesize_format }}</div>
-                                                        <div class="activity-content-item-meta-separator content-item-meta-separator"></div>
-                                                        <div class="activity-content-item-meta-fileType" title="Image file">Image file</div>
+                                            <div class="activity-content-item--hover">
+                                                <button class="activity-content-item-preview" title="Preview" href="./attachments/{{ attachments[url].filename }}" data-featherlight="image"><div class="activity-content-item-preview-text">Preview</div></button>
+                                                <div class="activity-content-item-info">
+                                                    <div class="activity-content-item-meta">
+                                                        <div class="activity-content-item-meta-filename" title="{{ attachments[url].filename }}">{{ attachments[url].filename }}</div>
+                                                        <div class="activity-content-item-meta-secondary">
+                                                            <div class="activity-content-item-meta-size" title="{{ attachments[url].content_length }} bytes">{{ attachments[url].content_length|filesize_format }}</div>
+                                                            <div class="activity-content-item-meta-separator content-item-meta-separator"></div>
+                                                            <div class="activity-content-item-meta-fileType" title="Image file">Image file</div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="activity-content-item-actions">
+                                                        <a download="{{ attachments[url].filename }}" href="./attachments/{{ attachments[url].filename }}">
+                                                            <span class="icon icon-download_24 activity-content-item-actions-button active" role="button" tabindex="0" title="Download"></span>
+                                                        </a>
                                                     </div>
                                                 </div>
-                                                <div class="activity-content-item-actions">
-                                                    <a download="{{ attachments[url].filename }}" href="./attachments/{{ attachments[url].filename }}">
-                                                        <span class="icon icon-download_24 activity-content-item-actions-button active" role="button" tabindex="0" title="Download"></span>
-                                                    </a>
-                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </li>
-                            {% else %}
-                                <li class="shareItem shareGeneral">
-                                    <div class="chip chip--lg chip--dark">
-                                        <div class="chip-icon">
-                                            <span class="icon icon-document_32"></span>
+                                    </li>
+                                {% else %}
+                                    <li class="shareItem shareGeneral">
+                                        <div class="chip chip--lg chip--dark">
+                                            <div class="chip-icon">
+                                                <span class="icon icon-document_32"></span>
+                                            </div>
+                                            <div class="chip-info">
+                                                <span class="chip-text chip-text--primary" title="{{ attachments[url].filename }}">{{ attachments[url].filename }}</span>
+                                                <span class="chip-text chip-text--secondary" title="{{ attachments[url].content_type }}">
+                                                    <div class="file-chip-secondary">
+                                                        <span class="file-chip-meta-size">{{ attachments[url].content_length|filesize_format }}</span>
+                                                        <span class="mid-dot"></span>
+                                                        <span class="file-chip-meta-fileType">{{ attachments[url].content_type }}</span>
+                                                    </div>
+                                                </span>
+                                            </div>
+                                            <div class="chip-actions">
+                                                <a download="{{ attachments[url].filename }}" href="./attachments/{{ attachments[url].filename }}">
+                                                    <span class="icon icon-download_24 chip-action chip-action-icon active" role="button" tabindex="0" title="Download"></span>
+                                                </a> 
+                                            </div>
                                         </div>
-                                        <div class="chip-info">
-                                            <span class="chip-text chip-text--primary" title="{{ attachments[url].filename }}">{{ attachments[url].filename }}</span>
-                                            <span class="chip-text chip-text--secondary" title="{{ attachments[url].content_type }}">
-                                                <div class="file-chip-secondary">
-                                                    <span class="file-chip-meta-size">{{ attachments[url].content_length|filesize_format }}</span>
-                                                    <span class="mid-dot"></span>
-                                                    <span class="file-chip-meta-fileType">{{ attachments[url].content_type }}</span>
-                                                </div>
-                                            </span>
-                                        </div>
-                                        <div class="chip-actions">
-                                            <a download="{{ attachments[url].filename }}" href="./attachments/{{ attachments[url].filename }}">
-                                                <span class="icon icon-download_24 chip-action chip-action-icon active" role="button" tabindex="0" title="Download"></span>
-                                            </a> 
-                                        </div>
-                                    </div>
-                                </li>
+                                    </li>
+                                {% endif %}
                             {% endif %}
                         {% endfor %}
                     </ul>
