@@ -11,7 +11,7 @@ Webex Teams Archiver
 
 -------------------------------------------------------------------------------
 
-Webex Teams Archiver extracts the messages and files out of a Webex Teams room and saves them in text and HTML formats.
+Webex Teams Archiver extracts the messages and files out of a Webex Teams room and saves them in text, HTML, and JSON formats.
 
 Example
 -------
@@ -45,11 +45,11 @@ Produces the following files:
 
 Below is an example of a simple room that got archived.
 
-.. image:: sample.png
+.. image:: https://raw.githubusercontent.com/CiscoDevNet/webex-teams-archiver/master/sample.png
    :scale: 40 %
 
 
-Note: The HTML version of the archive requires Internet connectivity because of CSS and avatars.
+Note: The HTML version of the archive requires Internet connectivity because of the CSS and image previewer JS which are not packaged with the archive because of licensing and also to keep the archive file smaller.
 
 Installation
 ------------
