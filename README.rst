@@ -4,6 +4,8 @@ Webex Teams Archiver
 
 *Simple utility to archive Webex Teams rooms*
 
+.. image:: https://static.production.devnetcloud.com/codeexchange/assets/images/devnet-published.svg
+    :target: https://developer.cisco.com/codeexchange/github/repo/CiscoDevNet/webex-teams-archiver
 .. image:: https://img.shields.io/badge/license-MIT-blue.svg
     :target: https://github.com/CiscoDevNet/webex-teams-archiver/blob/master/LICENSE
 .. image:: https://img.shields.io/pypi/v/webexteamsarchiver.svg
