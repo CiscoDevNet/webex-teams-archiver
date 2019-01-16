@@ -51,6 +51,8 @@ Below is an example of a simple room that got archived.
 
 Note: The HTML version of the archive requires Internet connectivity because of the CSS and image previewer JS which are not packaged with the archive because of licensing and also to keep the archive file smaller.
 
+Note: Please note that use of the Webex Teams Archiver may violate the retention policy, if any, applicable to your use of Webex Teams.
+
 Installation
 ------------
 
@@ -114,7 +116,7 @@ Contribution
 
 webexteamsarchiver_ is a *community developed* project. Code contributions are welcome via PRs!
 
-*Copyright (c) 2018 Cisco and/or its affiliates.*
+*Copyright (c) 2018-2019 Cisco and/or its affiliates.*
 
 
 .. _webexteamsarchiver: https://github.com/CiscoDevNet/webex-teams-archiver
