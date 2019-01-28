@@ -51,9 +51,11 @@ Below is an example of a simple room that got archived.
    :scale: 40 %
 
 
-Note: The HTML version of the archive requires Internet connectivity because of the CSS and image previewer JS which are not packaged with the archive because of licensing and also to keep the archive file smaller.
+Note 1: The HTML version of the archive requires Internet connectivity because of the CSS and image previewer JS which are not packaged with the archive because of licensing and also to keep the archive file smaller.
 
-Note: Please note that use of the Webex Teams Archiver may violate the retention policy, if any, applicable to your use of Webex Teams.
+Note 2: Some older spaces were affected by the Webex Teams 2018 outage which may cause the archiver to crash. This is pending a fix_ from the SDK.
+
+Note 3: Please note that use of the Webex Teams Archiver may violate the retention policy, if any, applicable to your use of Webex Teams.
 
 Installation
 ------------
@@ -88,7 +90,7 @@ The `archive_room` method exposes the following options:
 +----------------------+-------------------+---------------------------------------------------+
 
 
-In addition, the `options` kwargs supports the following options today:
+In addition, the `options` kwargs supports the following additional options today:
 
 +----------------------+-------------------+---------------------------------------------------+ 
 | Argument             | Default Value     | Description                                       | 
@@ -123,3 +125,4 @@ webexteamsarchiver_ is a *community developed* project. Code contributions are w
 
 .. _webexteamsarchiver: https://github.com/CiscoDevNet/webex-teams-archiver
 .. _issues: https://github.com/CiscoDevNet/webex-teams-archiver/issues
+.. _fix: https://github.com/CiscoDevNet/webexteamssdk/issues/70
