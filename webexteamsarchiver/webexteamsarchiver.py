@@ -35,7 +35,7 @@ from .jinja_env import sanitize_filename
 __all__ = ['WebexTeamsArchiver', 'File', 'UserNotFound']
 
 File = namedtuple(
-    "File", "content_disposition content_length content_type filename")
+    "File", "content_disposition content_length content_type filename deleted")
 
 UserNotFound = namedtuple(
     "UserNotFound", "id emails displayName avatar"
@@ -74,19 +74,18 @@ class WebexTeamsArchiver:
             MalformedResponse: Webex Teams API response did not contain expected data.
 
         Returns:
-            None: The file no longer exists.
             File: Details about the file.
         """
 
         headers = {
             "Authorization": f"Bearer {self.access_token}",
-            "Accept-Encoding": "",
+            "Accept-Encoding": "", # ensures content-length always gets returned
         }
 
         r = requests.head(url, headers=headers)
         if r.status_code == 404:
             # Item must have been deleted since url was retrieved
-            return None
+            return File("", 0, "", "", True)
 
         r.raise_for_status()
 
@@ -101,7 +100,8 @@ class WebexTeamsArchiver:
         return File(r.headers.get("Content-Disposition", ""),
                     r.headers.get("Content-Length", 0),
                     r.headers.get("Content-Type", ""),
-                    filename_re.group(1))
+                    filename_re.group(1),
+                    False)
 
     def archive_room(self, room_id: str, text_format: bool = True, html_format: bool = True,
                      json_format: bool = True, **options) -> None:
@@ -214,13 +214,12 @@ class WebexTeamsArchiver:
 
                 if download_avatars and people[msg.personEmail].avatar:
                     avatars[people[msg.personEmail].avatar] = File(
-                        None, None, None, sanitize_filename(msg.personEmail))
+                        "", "", "", sanitize_filename(msg.personEmail), False)
 
             if msg.files:
                 for url in msg.files:
                     file_metadata = self.file_details(url)
-                    if file_metadata and url not in attachments:
-                        attachments[url] = file_metadata
+                    attachments[url] = file_metadata
 
         if reverse_order:
             repeat_indeces = [len(processed_messages)-i for i in repeat_indeces]

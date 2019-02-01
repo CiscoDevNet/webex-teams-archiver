@@ -13,7 +13,7 @@
                 <div class="share">
                     <ul class="shareList">
                         {% for url in message.files %}
-                            {% if url in attachments %}
+                            {% if attachments[url].deleted == false %}
                                 {% if attachments[url].content_type.startswith('image/') %}
                                     <li class="shareItem shareImage">
                                         <div class="activity-content-item-section">
