@@ -266,6 +266,7 @@ class WebexTeamsArchiver:
             basepath = os.path.dirname(os.path.realpath(__file__))
 
             shutil.copytree(f"{basepath}/static/.css", f"{room_id}/.css")
+            shutil.copytree(f"{basepath}/static/.js", f"{room_id}/.js")
             shutil.copytree(f"{basepath}/static/.fonts", f"{room_id}/.fonts")
 
     def _tear_down_folder(self, room_id: str) -> None:

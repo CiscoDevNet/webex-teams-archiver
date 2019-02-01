@@ -51,7 +51,7 @@ Below is an example of a simple room that got archived.
    :scale: 40 %
 
 
-Note 1: The HTML version of the archive requires Internet connectivity because of the CSS and image previewer JS which are not packaged with the archive because of licensing and also to keep the archive file smaller.
+Note 1: The HTML version of the archive requires Internet connectivity because of the CSS, which is not packaged with the archive because of licensing conflicts.
 
 Note 2: Some older spaces were affected by the Webex Teams 2018 outage which may cause the archiver to crash. This is pending a fix_ from the SDK.
 
