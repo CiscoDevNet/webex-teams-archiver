@@ -243,7 +243,12 @@ class WebexTeamsArchiver:
 
         # Write space information to json file
         with open(os.path.join(os.getcwd(), room_id, f"space_details.json"), "w", encoding="utf-8") as fh:
-            json.dump(self.room.to_dict(), fh)
+            space_details = {
+                "space": self.room.to_dict(),
+                "creator": self.room_creator._asdict() if isinstance(self.room_creator, UserNotFound) \
+                                                       else self.room_creator.to_dict(),
+            }
+            json.dump(space_details, fh)
 
         logger.info("Room %s archived successfully.", room_id)
 
