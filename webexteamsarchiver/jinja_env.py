@@ -20,6 +20,7 @@ SOFTWARE.
 """
 import jinja2
 import datetime
+import re
 from hurry.filesize import size, alternative
 
 __all__ = ['env', 'sanitize_filename']
@@ -45,7 +46,7 @@ def datetime_format(date: datetime, format: str) -> str:
 
 
 def sanitize_filename(email: str) -> str:
-    return ''.join(e for e in email if e.isalnum())
+    return re.sub('[^A-Za-z0-9]+', '_', email)
 
 
 env = jinja2.Environment(
