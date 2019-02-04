@@ -104,12 +104,12 @@ class WebexTeamsArchiver:
                     False)
 
     def archive_room(self, room_id: str, text_format: bool = True, html_format: bool = True,
-                     json_format: bool = True, **options) -> None:
+                     json_format: bool = True, **options) -> str:
         """
-        Archives a Webex Teams room. This creates a file called `room_id`.tgz 
+        Archives a Webex Teams room. This creates a file called roomTitle_roomId.tgz 
         with the following contents:
-        - `room_id`.txt - Text version of the conversations (if `text_format` is True)
-        - `room_id`.html - HTML version of the conversations (if `html_format` is True)
+        - roomTitle_roomId.txt - Text version of the conversations (if `text_format` is True)
+        - roomTitle_roomId.html - HTML version of the conversations (if `html_format` is True)
         - files/ - Attachments added to the room (if `download_attachments` is True)
 
         Args:
@@ -128,7 +128,7 @@ class WebexTeamsArchiver:
                 timestamp_format: Timestamp strftime format.
 
         Returns:
-            None
+            Name of archive file.
 
         Raises:
             IOError: Error occurred while creating/writing to files.
@@ -137,10 +137,6 @@ class WebexTeamsArchiver:
             TypeError: Messages contained non JSON serializable data.
             webexteamssdkException: An error occurred calling the Webex Teams API.
         """
-
-        if not (text_format or html_format or json_format):
-            raise ValueError("At least one of text_format, html_format, or json_format must be True.")
-
         # Configure options
         overwrite_folder = options.get("overwrite_folder", True)
         delete_folder = options.get("delete_folder", False)
@@ -150,28 +146,30 @@ class WebexTeamsArchiver:
         download_workers = options.get("download_workers", 15)
         timestamp_format = options.get("timestamp_format", "%Y-%m-%dT%H:%M:%S")
 
+        self._gather_room_information(room_id)
+
         # Prepare folder
-        self._setup_folder(room_id, overwrite_folder, download_attachments, download_avatars, html_format)
+        self._setup_folder(overwrite_folder, download_attachments, download_avatars, html_format)
         try:
-            self._archive(room_id, reverse_order, download_attachments, download_avatars,
-                          download_workers, text_format, html_format, json_format, timestamp_format)
-            self._compress_folder(room_id)
+            self._archive(reverse_order, download_attachments, download_avatars, download_workers,
+                          text_format, html_format, json_format, timestamp_format)
+            self._compress_folder()
         except Exception:
-            self._tear_down_folder(room_id)
+            self._tear_down_folder()
             raise
 
         if delete_folder:
-            self._tear_down_folder(room_id)
+            self._tear_down_folder()
 
-    def _archive(self, room_id: str, reverse_order: bool, download_attachments: bool,
-                 download_avatars: bool, download_workers: int, text_format: bool, 
+        return f"{self.archive_folder_name}.tgz"
+
+    def _archive(self, reverse_order: bool, download_attachments: bool,
+                 download_avatars: bool, download_workers: int, text_format: bool,
                  html_format: bool, json_format: bool, timestamp_format: str) -> None:
         """
         Collects room messages and attachments using Webex Teams 
         APIs and writes them to text/html files.
         """
-        self._gather_room_information(room_id)
-
         # Structure: {"personEmail": webexteamssdk.PeopleAPI.Person}
         people = {}
 
@@ -226,23 +224,23 @@ class WebexTeamsArchiver:
             processed_messages = list(reversed(processed_messages))
 
         if html_format:
-            self._create_html_transcript(room_id, processed_messages, attachments, people,
+            self._create_html_transcript(processed_messages, attachments, people,
                                          download_avatars, repeat_indeces, timestamp_format)
 
         if text_format:
-            self._create_text_transcript(room_id, processed_messages, attachments, timestamp_format)
+            self._create_text_transcript(processed_messages, attachments, timestamp_format)
 
         if download_attachments:
-            self._download_files(room_id, "attachments", attachments, download_workers)
+            self._download_files("attachments", attachments, download_workers)
 
         if download_avatars:
-            self._download_files(room_id, "avatars", avatars, download_workers)
+            self._download_files("avatars", avatars, download_workers)
 
         if json_format:
-            self._create_json_transcript(room_id, processed_messages)
+            self._create_json_transcript(processed_messages)
 
         # Write space information to json file
-        with open(os.path.join(os.getcwd(), room_id, f"space_details.json"), "w", encoding="utf-8") as fh:
+        with open(os.path.join(os.getcwd(), self.archive_folder_name, f"space_details.json"), "w", encoding="utf-8") as fh:
             space_details = {
                 "space": self.room.to_dict(),
                 "creator": self.room_creator._asdict() if isinstance(self.room_creator, UserNotFound) 
@@ -250,40 +248,42 @@ class WebexTeamsArchiver:
             }
             json.dump(space_details, fh)
 
-        logger.info("Room %s archived successfully.", room_id)
+        logger.info("Room %s archived successfully.", self.room.id)
 
-    def _setup_folder(self, room_id: str, overwrite_folder: bool, download_attachments: bool,
+    def _setup_folder(self, overwrite_folder: bool, download_attachments: bool,
                       download_avatars, html_format: bool) -> None:
-        """Creates a folder `room_id` to store archive."""
+        """Creates a folder roomTitle_roomId to store archive."""
 
-        if os.path.isdir(room_id) and overwrite_folder:
-            shutil.rmtree(room_id, ignore_errors=False)
+        if os.path.isdir(self.archive_folder_name) and overwrite_folder:
+            shutil.rmtree(self.archive_folder_name, ignore_errors=False)
 
-        os.makedirs(room_id)
+        os.makedirs(self.archive_folder_name)
 
         if download_attachments:
-            os.makedirs(f"{room_id}/attachments")
+            os.makedirs(f"{self.archive_folder_name}/attachments")
 
         if download_avatars:
-            os.makedirs(f"{room_id}/avatars")
+            os.makedirs(f"{self.archive_folder_name}/avatars")
 
         if html_format:
             basepath = os.path.dirname(os.path.realpath(__file__))
 
-            shutil.copytree(f"{basepath}/static/.css", f"{room_id}/.css")
-            shutil.copytree(f"{basepath}/static/.js", f"{room_id}/.js")
-            shutil.copytree(f"{basepath}/static/.fonts", f"{room_id}/.fonts")
+            shutil.copytree(f"{basepath}/static/.css", f"{self.archive_folder_name}/.css")
+            shutil.copytree(f"{basepath}/static/.js", f"{self.archive_folder_name}/.js")
+            shutil.copytree(f"{basepath}/static/.fonts", f"{self.archive_folder_name}/.fonts")
 
-    def _tear_down_folder(self, room_id: str) -> None:
-        """Deletes the `room_id` folder in case an exception was raised."""
+    def _tear_down_folder(self) -> None:
+        """Deletes the roomTitle_roomId folder in case an exception was raised."""
 
-        if os.path.isdir(room_id):
-            shutil.rmtree(room_id, ignore_errors=False)
+        if os.path.isdir(self.archive_folder_name):
+            shutil.rmtree(self.archive_folder_name, ignore_errors=False)
 
     def _gather_room_information(self, room_id: str) -> None:
         """Calls Webex Teams APIs to get room information and messages."""
 
         self.room = self.sdk.rooms.get(room_id)
+        self.archive_folder_name = f"{sanitize_name(self.room.title)}_{room_id}"
+
         try:
             self.room_creator = self.sdk.people.get(self.room.creatorId)
         except ApiError as e:
@@ -302,8 +302,8 @@ class WebexTeamsArchiver:
         else:
             self.messages = self.sdk.messages.list(room_id)
 
-    def _create_text_transcript(self, room_id: str, messages: list,
-                                attachments: dict, timestamp_format: str) -> None:
+    def _create_text_transcript(self, messages: list, attachments: dict,
+                                timestamp_format: str) -> None:
         """Writes room messages to a text file."""
 
         template = jinja_env.get_template("default.txt")
@@ -315,20 +315,21 @@ class WebexTeamsArchiver:
             timestamp_format=timestamp_format,
         )
 
-        with open(os.path.join(os.getcwd(), room_id, f"{room_id}.txt"), "w", encoding="utf-8") as fh:
+        with open(os.path.join(os.getcwd(), self.archive_folder_name, f"{self.archive_folder_name}.txt"), "w", encoding="utf-8") as fh:
             fh.write(text_transcript)
 
-    def _create_json_transcript(self, room_id: str, messages: list) -> None:
+    def _create_json_transcript(self, messages: list) -> None:
         """Writes room messages to a JSON file."""
 
         data = {
             "items": [m.to_dict() for m in messages]
         }
-        with open(os.path.join(os.getcwd(), room_id, f"{room_id}.json"), "w", encoding="utf-8") as fh:
+        with open(os.path.join(os.getcwd(), self.archive_folder_name, f"{self.archive_folder_name}.json"), "w", encoding="utf-8") as fh:
             json.dump(data, fh)
 
-    def _create_html_transcript(self, room_id: str, messages: list, attachments: dict, people: dict,
-                                download_avatars: dict, repeat_indeces: list, timestamp_format: str) -> None:
+    def _create_html_transcript(self, messages: list, attachments: dict, people: dict,
+                                download_avatars: dict, repeat_indeces: list,
+                                timestamp_format: str) -> None:
         """Writes room messages to an HTML file."""
 
         template = jinja_env.get_template("default.html")
@@ -343,23 +344,22 @@ class WebexTeamsArchiver:
             timestamp_format=timestamp_format
         )
 
-        with open(os.path.join(os.getcwd(), room_id, f"{room_id}.html"), "w", encoding="utf-8") as fh:
+        with open(os.path.join(os.getcwd(), self.archive_folder_name, f"{self.archive_folder_name}.html"), "w", encoding="utf-8") as fh:
             fh.write(html)
 
-    def _download_files(self, room_id: str, folder_name: str, links: dict, workers: int) -> None:
+    def _download_files(self, folder_name: str, links: dict, workers: int) -> None:
         """Downloads files given a list of URL links."""
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
             result = {
-                executor.submit(self._download_file, room_id, folder_name,
-                                url, links[url].filename): url for url in links
+                executor.submit(self._download_file, folder_name, url, links[url].filename): url for url in links
             }
 
             # Do this to check if any downloads failed.
             for future in concurrent.futures.as_completed(result):
                 future.result()
 
-    def _download_file(self, room_id: str, folder_name: str, url: str, filename: str) -> None:
+    def _download_file(self, folder_name: str, url: str, filename: str) -> None:
         """Download file from Webex Teams."""
 
         headers = {
@@ -369,13 +369,13 @@ class WebexTeamsArchiver:
         # https://stackoverflow.com/questions/16694907/how-to-download-
         # large-file-in-python-with-requests-py
         with requests.get(url, headers=headers, stream=True) as r:
-            with open(os.path.join(os.getcwd(), room_id, folder_name, f"{filename}"), "wb") as f:
+            with open(os.path.join(os.getcwd(), self.archive_folder_name, folder_name, f"{filename}"), "wb") as f:
                 shutil.copyfileobj(r.raw, f)
 
-    def _compress_folder(self, room_id: str) -> None:
-        """Compress `room_id` folder as `room_id`.tgz"""
+    def _compress_folder(self) -> None:
+        """Compress `archive_folder_name` folder as `archive_folder_name`.tgz"""
 
         # https://stackoverflow.com/questions/2032403/how-to-create-
         # full-compressed-tar-file-using-python
-        with tarfile.open(f"{room_id}.tgz", "w:gz") as tar:
-            tar.add(f"{room_id}")
+        with tarfile.open(f"{self.archive_folder_name}.tgz", "w:gz") as tar:
+            tar.add(self.archive_folder_name)
