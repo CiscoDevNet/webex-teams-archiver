@@ -30,7 +30,7 @@ from collections import namedtuple
 from webexteamssdk import WebexTeamsAPI
 from webexteamssdk.exceptions import MalformedResponse, ApiError
 from .jinja_env import env as jinja_env
-from .jinja_env import sanitize_filename
+from .jinja_env import sanitize_name
 
 __all__ = ['WebexTeamsArchiver', 'File', 'UserNotFound']
 
@@ -214,7 +214,7 @@ class WebexTeamsArchiver:
 
                 if download_avatars and people[msg.personEmail].avatar:
                     avatars[people[msg.personEmail].avatar] = File(
-                        "", "", "", sanitize_filename(msg.personEmail), False)
+                        "", "", "", sanitize_name(msg.personEmail), False)
 
             if msg.files:
                 for url in msg.files:
