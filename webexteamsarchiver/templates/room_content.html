@@ -22,13 +22,16 @@
                                                     <img alt="File" class="" draggable="false" src="./attachments/{{ attachments[url].filename }}" style="width: auto; height: auto;" href="./attachments/{{ attachments[url].filename }}" data-featherlight="image">
                                                 </div>
                                             </div>
-                                            <div class="activity-content-item--hover">
-                                                <div class="activity-content-item-info">
-                                                    <div class="activity-content-item-meta">
-                                                        <div class="activity-content-item-meta-secondary">
-                                                            <div class="activity-content-item-meta-fileType" title="Image file">Image file <span class="mid-dot"></span> {{ attachments[url].filename }} <span class="mid-dot"></span> {{ attachments[url].content_length|filesize_format }} <span class="mid-dot"></span> <a download="{{ attachments[url].filename }}" href="./attachments/{{ attachments[url].filename }}">Download</a></div>
+                                            <div class="chip chip--lg chip--dark">
+                                                <div class="chip-info">
+                                                    <span class="chip-text chip-text--primary">Image File<span class="mid-dot"></span><a title="Download" download="{{ attachments[url].filename }}" href="./attachments/{{ attachments[url].filename }}">{{ attachments[url].filename }}</a></span>
+                                                    <span class="chip-text chip-text--secondary" title="{{ attachments[url].content_type }}">
+                                                        <div class="file-chip-secondary">
+                                                            <span class="file-chip-meta-size">{{ attachments[url].content_length|filesize_format }}</span>
+                                                            <span class="mid-dot"></span>
+                                                            <span class="file-chip-meta-fileType">{{ attachments[url].content_type }}</span>
                                                         </div>
-                                                    </div>
+                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
@@ -37,7 +40,7 @@
                                     <li class="shareItem shareGeneral">
                                         <div class="chip chip--lg chip--dark">
                                             <div class="chip-info">
-                                                <span class="chip-text chip-text--primary" title="{{ attachments[url].filename }}">File<span class="mid-dot"></span><a download="{{ attachments[url].filename }}" href="./attachments/{{ attachments[url].filename }}">{{ attachments[url].filename }}</a></span>
+                                                <span class="chip-text chip-text--primary">File<span class="mid-dot"></span><a title="Download" download="{{ attachments[url].filename }}" href="./attachments/{{ attachments[url].filename }}">{{ attachments[url].filename }}</a></span>
                                                 <span class="chip-text chip-text--secondary" title="{{ attachments[url].content_type }}">
                                                     <div class="file-chip-secondary">
                                                         <span class="file-chip-meta-size">{{ attachments[url].content_length|filesize_format }}</span>
