@@ -352,7 +352,7 @@ class WebexTeamsArchiver:
 
         with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
             result = {
-                executor.submit(self._download_file, folder_name, url, links[url].filename): url for url in links
+                executor.submit(self._download_file, folder_name, url, links[url].filename): url for url in links if not links[url].deleted
             }
 
             # Do this to check if any downloads failed.

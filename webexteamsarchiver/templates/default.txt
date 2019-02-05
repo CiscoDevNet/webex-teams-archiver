@@ -5,7 +5,11 @@ Created by {{ room_creator.displayName }} ({{ room_creator.emails[0] }}) on {{ r
     {{- msg.created|datetime_format(timestamp_format) }} {{ msg.personEmail }}: {{ msg.text }}
     {% if msg.files %}
         {% for url in msg.files %}
-            {{- msg.created|datetime_format(timestamp_format) }} {{ msg.personEmail }}: Attachment: {{ attachments[url].filename }} ({{ attachments[url].content_length }} bytes, {{ attachments[url].content_type }})
+            {% if attachments[url].deleted == false %}
+                {{- msg.created|datetime_format(timestamp_format) }} {{ msg.personEmail }}: Attachment: {{ attachments[url].filename }} ({{ attachments[url].content_length }} bytes, {{ attachments[url].content_type }})
+            {% else %}
+                Attachment: File deleted or not found.
+            {% endif %}
         {% endfor %}
     {% endif %}
 {% endfor %}
