@@ -79,7 +79,7 @@ class WebexTeamsArchiver:
 
         headers = {
             "Authorization": f"Bearer {self.access_token}",
-            "Accept-Encoding": "", # ensures content-length always gets returned
+            "Accept-Encoding": "",  # ensures content-length always gets returned
         }
 
         r = requests.head(url, headers=headers)
@@ -97,7 +97,7 @@ class WebexTeamsArchiver:
             )
             raise MalformedResponse(message)
 
-        return File(r.headers.get("Content-Disposition", ""),
+        return File(sanitize_name(r.headers.get("Content-Disposition", "")),
                     r.headers.get("Content-Length", 0),
                     r.headers.get("Content-Type", ""),
                     filename_re.group(1),
