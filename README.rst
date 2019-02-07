@@ -34,13 +34,13 @@ Produces the following files:
 .. code-block:: bash
 
     $ ls 
-    Space_Title_Y2lzY29zcGFyazovL3VzL1JPT00vd2ViZXh0ZWFtc2FyY2hpdmVy.tgz
-    Space_Title_Y2lzY29zcGFyazovL3VzL1JPT00vd2ViZXh0ZWFtc2FyY2hpdmVy
+    Title_Timestamp_Y2lzY29zcGFyazovL3VzL1JPT00vd2ViZXh0ZWFtc2FyY2hpdmVy.tgz
+    Title_Timestamp_Y2lzY29zcGFyazovL3VzL1JPT00vd2ViZXh0ZWFtc2FyY2hpdmVy
 
-    $ ls Space_Title_Y2lzY29zcGFyazovL3VzL1JPT00vd2ViZXh0ZWFtc2FyY2hpdmVy/
-    Space_Title_Y2lzY29zcGFyazovL3VzL1JPT00vd2ViZXh0ZWFtc2FyY2hpdmVy.html
-    Space_Title_Y2lzY29zcGFyazovL3VzL1JPT00vd2ViZXh0ZWFtc2FyY2hpdmVy.json
-    Space_Title_Y2lzY29zcGFyazovL3VzL1JPT00vd2ViZXh0ZWFtc2FyY2hpdmVy.txt
+    $ ls Title_Timestamp_Y2lzY29zcGFyazovL3VzL1JPT00vd2ViZXh0ZWFtc2FyY2hpdmVy/
+    Title_Timestamp_Y2lzY29zcGFyazovL3VzL1JPT00vd2ViZXh0ZWFtc2FyY2hpdmVy.html
+    Title_Timestamp_Y2lzY29zcGFyazovL3VzL1JPT00vd2ViZXh0ZWFtc2FyY2hpdmVy.json
+    Title_Timestamp_Y2lzY29zcGFyazovL3VzL1JPT00vd2ViZXh0ZWFtc2FyY2hpdmVy.txt
     attachments/
     avatars/
     space_details.json
@@ -53,7 +53,7 @@ Below is an example of a simple room that got archived.
 
 Note 1: The HTML version of the archive requires Internet connectivity because of the CSS, which is not packaged with the archive because of licensing conflicts.
 
-Note 2: Some older spaces were affected by the Webex Teams 2018 outage which may cause the archiver to crash. This is pending a fix_ from the SDK.
+Note 2: Some older spaces were affected by the Webex Teams 2018 outage which may cause the archiver to crash. This is pending a workaround_ from the SDK.
 
 Note 3: Please note that use of the Webex Teams Archiver may violate the retention policy, if any, applicable to your use of Webex Teams.
 
@@ -125,4 +125,4 @@ webexteamsarchiver_ is a *community developed* project. Code contributions are w
 
 .. _webexteamsarchiver: https://github.com/CiscoDevNet/webex-teams-archiver
 .. _issues: https://github.com/CiscoDevNet/webex-teams-archiver/issues
-.. _fix: https://github.com/CiscoDevNet/webexteamssdk/issues/70
+.. _workaround: https://github.com/CiscoDevNet/webexteamssdk/issues/70

@@ -26,6 +26,7 @@ import shutil
 import tarfile
 import logging
 import json
+import datetime
 from collections import namedtuple
 from webexteamssdk import WebexTeamsAPI
 from webexteamssdk.exceptions import MalformedResponse, ApiError
@@ -282,7 +283,9 @@ class WebexTeamsArchiver:
         """Calls Webex Teams APIs to get room information and messages."""
 
         self.room = self.sdk.rooms.get(room_id)
-        self.archive_folder_name = f"{sanitize_name(self.room.title)}_{room_id}"
+
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d--%H-%M-%S")
+        self.archive_folder_name = f"{sanitize_name(self.room.title)}_{timestamp}_{room_id}"
 
         try:
             self.room_creator = self.sdk.people.get(self.room.creatorId)
