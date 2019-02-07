@@ -27,10 +27,16 @@ __all__ = ['env', 'sanitize_name']
 
 
 def filesize_format(size_bytes):
+    is not str(size_bytes).isdigit():
+        return 0
+
     return size(int(size_bytes), system=alternative)
 
 
 def person_letters(display_name: str) -> str:
+    if not display_name:
+        return "Person Not Found"
+        
     output = ""
     for name in display_name.upper().split():
         output += name[0]
@@ -44,7 +50,7 @@ def person_letters(display_name: str) -> str:
 def datetime_format(date: datetime, format: str) -> str:
     if not date:
         return str(date)
-        
+
     return date.strftime(format)
 
 

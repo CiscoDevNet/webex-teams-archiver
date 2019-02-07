@@ -198,18 +198,26 @@ class WebexTeamsArchiver:
             previous_msg_datetime = msg.created
 
             if msg.personEmail not in people:
-                try:
-                    people[msg.personEmail] = self.sdk.people.get(msg.personId)
-                except ApiError as e:
-                    if e.response.status_code == 404:
-                        people[msg.personEmail] = UserNotFound(
-                            id=msg.personId,
-                            emails=[msg.personEmail],
+                if not msg.personId:
+                    people[msg.personEmail] = UserNotFound(
+                            id=str(msg.personId),
+                            emails=[str(msg.personEmail)],
                             displayName="Person Not Found",
                             avatar=None,
-                        )
-                    else:
-                        raise
+                    )
+                else:
+                    try:
+                        people[msg.personEmail] = self.sdk.people.get(msg.personId)
+                    except ApiError as e:
+                        if e.response.status_code == 404:
+                            people[str(msg.personEmail)] = UserNotFound(
+                                id=msg.personId,
+                                emails=[msg.personEmail],
+                                displayName="Person Not Found",
+                                avatar=None,
+                            )
+                        else:
+                            raise
 
                 if download_avatars and people[msg.personEmail].avatar:
                     avatars[people[msg.personEmail].avatar] = File(
