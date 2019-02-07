@@ -42,6 +42,9 @@ def person_letters(display_name: str) -> str:
 
 
 def datetime_format(date: datetime, format: str) -> str:
+    if not date:
+        return str(date)
+        
     return date.strftime(format)
 
 

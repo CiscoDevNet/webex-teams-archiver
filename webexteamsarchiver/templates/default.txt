@@ -1,5 +1,5 @@
 Title: {{ room.title }}
-Created by {{ room_creator.displayName }} ({{ room_creator.emails[0] }}) on {{ room.created|datetime_format(timestamp_format) }} and last had activity on {{ room.lastActivity|datetime_format(timestamp_format) }}.
+Created by {{ room_creator.displayName }} ({{ room_creator.emails[0] }}) on {{ room.created|datetime_format(timestamp_format) }}{% if room.lastActivity %} and last had activity on {{ room.lastActivity|datetime_format(timestamp_format) }}{% endif %}.
 
 {% for msg in messages %}
     {{- msg.created|datetime_format(timestamp_format) }} {{ msg.personEmail }}: {{ msg.text }}

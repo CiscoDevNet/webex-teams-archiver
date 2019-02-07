@@ -1,6 +1,6 @@
 <div style="padding-left: 20px;">
     <h4>{{ room.title }}</h4>
-    Created by <a href="mailto:{{ room_creator.emails[0] }}" alt="{{ room_creator.id }}">{{ room_creator.displayName }}</a> on {{ room.created|datetime_format(timestamp_format) }} and last had activity on {{ room.lastActivity|datetime_format(timestamp_format) }}.<br />
+    Created by <a href="mailto:{{ room_creator.emails[0] }}" alt="{{ room_creator.id }}">{{ room_creator.displayName }}</a> on {{ room.created|datetime_format(timestamp_format) }}{% if room.lastActivity %} and last had activity on {{ room.lastActivity|datetime_format(timestamp_format) }}{% endif %}.<br />
 </div>
 <div>
     <div id="activity-items" tabindex="0" role="button">
