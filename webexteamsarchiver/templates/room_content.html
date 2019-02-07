@@ -4,15 +4,15 @@
 </div>
 <div>
     <div id="activity-items" tabindex="0" role="button">
-        {% for message in messages %}
-        <div class="activity-item" data-group-pos="{% if loop.index-1 in repeat_indeces %}additional{% else %}start{% endif %}"><button class="cui-button cui-button--none avatar-wrapper activity-item-avatarWrapper" alt="{{ people[message.personEmail].displayName }} - {{ message.personEmail }}" type="button" aria-label="{{ people[message.personEmail].displayName }} - {{ message.personEmail }}" tabindex="0" title="{{ people[message.personEmail].displayName }} - {{ message.personEmail }}"><span class="cui-button__children" style="opacity: 1;"><div class="cui-avatar cui-avatar--36" title="{{ people[message.personEmail].displayName }} - {{ message.personEmail }}">{% if people[message.personEmail].avatar %}<img alt="" class="cui-avatar__img" draggable="false" src="{% if download_avatars %}./avatars/{{ message.personEmail|sanitize_name }}{% else %}{{ people[message.personEmail].avatar }}{% endif %}">{% else %}<span class="cui-avatar__letter">{{ people[message.personEmail].displayName|person_letters }}</span>{% endif %}</div></span></button><span class="file-title"></span>
+        {% for msg in messages %}
+        <div class="activity-item" data-group-pos="{% if loop.index-1 in repeat_indeces %}additional{% else %}start{% endif %}"><button class="cui-button cui-button--none avatar-wrapper activity-item-avatarWrapper" alt="{{ people[msg.personId].displayName }} - {% if msg.personEmail %}{{msg.personEmail}}{% else %}{{ people[msg.personId].emails[0] }}{% endif %}" type="button" aria-label="{{ people[msg.personId].displayName }} - {% if msg.personEmail %}{{msg.personEmail}}{% else %}{{ people[msg.personId].emails[0] }}{% endif %}" tabindex="0" title="{{ people[msg.personId].displayName }} - {% if msg.personEmail %}{{msg.personEmail}}{% else %}{{ people[msg.personId].emails[0] }}{% endif %}"><span class="cui-button__children" style="opacity: 1;"><div class="cui-avatar cui-avatar--36" title="{{ people[msg.personId].displayName }} - {% if msg.personEmail %}{{msg.personEmail}}{% else %}{{ people[msg.personId].emails[0] }}{% endif %}">{% if people[msg.personId].avatar %}<img alt="" class="cui-avatar__img" draggable="false" src="{% if download_avatars %}./avatars/{{ msg.personId }}{% else %}{{ people[msg.personId].avatar }}{% endif %}">{% else %}<span class="cui-avatar__letter">{{ people[msg.personId].displayName|person_letters }}</span>{% endif %}</div></span></button><span class="file-title"></span>
             <div class="content">
-                <div class="activity-item-sender-meta"><span class="activity-item-sender-meta__displayName" title="{{ people[message.personEmail].displayName }} - {{ message.personEmail }}">{{ people[message.personEmail].displayName }}</span><span class="activity-item-sender-meta__publishedDate">{{ message.created|datetime_format(timestamp_format) }}</span></div>
-                {% if message.html %}<div class="activity-item--message">{{ message.html }}</div>{% else %}<div class="activity-item--message">{{ message.text|replace("\n", "<br/>") }}</div>{% endif %}
-                {% if message.files %}
+                <div class="activity-item-sender-meta"><span class="activity-item-sender-meta__displayName" title="{{ people[msg.personId].displayName }} - {% if msg.personEmail %}{{msg.personEmail}}{% else %}{{ people[msg.personId].emails[0] }}{% endif %}">{{ people[msg.personId].displayName }}</span><span class="activity-item-sender-meta__publishedDate">{{ msg.created|datetime_format(timestamp_format) }}</span></div>
+                {% if msg.html %}<div class="activity-item--message">{{ msg.html }}</div>{% else %}<div class="activity-item--message">{{ msg.text|replace("\n", "<br/>") }}</div>{% endif %}
+                {% if msg.files %}
                 <div class="share">
                     <ul class="shareList">
-                        {% for url in message.files %}
+                        {% for url in msg.files %}
                             {% if attachments[url].deleted == false %}
                                 {% if attachments[url].content_type.startswith('image/') %}
                                     <li class="shareItem shareImage">

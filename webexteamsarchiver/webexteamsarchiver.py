@@ -30,6 +30,7 @@ import datetime
 from collections import namedtuple
 from webexteamssdk import WebexTeamsAPI
 from webexteamssdk.exceptions import MalformedResponse, ApiError
+from webexteamssdk.models.immutable import Person
 from .jinja_env import env as jinja_env
 from .jinja_env import sanitize_name
 
@@ -171,7 +172,7 @@ class WebexTeamsArchiver:
         Collects room messages and attachments using Webex Teams 
         APIs and writes them to text/html files.
         """
-        # Structure: {"personEmail": webexteamssdk.PeopleAPI.Person}
+        # Structure: {"personId": webexteamssdk.models.immutable.Person}
         people = {}
 
         # Structure: {"url": File}
@@ -184,49 +185,57 @@ class WebexTeamsArchiver:
 
         # Variables used to keep track if message is start or additional
         repeat_indeces = []
-        previous_person_email = ""
+        previous_person_id = ""
         previous_msg_datetime = None
 
         for index, msg in enumerate(self.messages):
-            processed_messages.append(msg)
-
-            if index > 0 and msg.personEmail == previous_person_email and \
+            if index > 0 and msg.personId == previous_person_id and \
                (previous_msg_datetime-msg.created).seconds < 60:
                 repeat_indeces.append(index)
 
-            previous_person_email = msg.personEmail
+            previous_person_id = msg.personId
             previous_msg_datetime = msg.created
 
-            if msg.personEmail not in people:
-                if not msg.personId:
-                    people[msg.personEmail] = UserNotFound(
-                            id=str(msg.personId),
-                            emails=[str(msg.personEmail)],
-                            displayName="Person Not Found",
-                            avatar=None,
-                    )
-                else:
+            if msg.personId not in people:
+                if msg.personId:
                     try:
-                        people[msg.personEmail] = self.sdk.people.get(msg.personId)
+                        people[msg.personId] = self.sdk.people.get(msg.personId)
+
+                        if not msg.personEmail:
+                            if isinstance(people[msg.personId], Person) and \
+                                isinstance(people[msg.personId].emails, list) and \
+                                    len(people[msg.personId].emails) > 0:
+
+                                msg._json_data["personEmail"] = people[msg.personId].emails[0]
+
                     except ApiError as e:
                         if e.response.status_code == 404:
-                            people[str(msg.personEmail)] = UserNotFound(
-                                id=msg.personId,
-                                emails=[msg.personEmail],
+                            people[msg.personId] = UserNotFound(
+                                id=str(msg.personId),
+                                emails=[str(msg.personEmail)],
                                 displayName="Person Not Found",
                                 avatar=None,
                             )
                         else:
                             raise
+                else:
+                    people[msg.personId] = UserNotFound(
+                            id=str(msg.personId),
+                            emails=[str(msg.personEmail)],
+                            displayName="Person Not Found",
+                            avatar=None,
+                    )
 
-                if download_avatars and people[msg.personEmail].avatar:
-                    avatars[people[msg.personEmail].avatar] = File(
-                        "", "", "", sanitize_name(msg.personEmail), False)
+                if download_avatars and people[msg.personId].avatar:
+                    avatars[people[msg.personId].avatar] = File(
+                        "", "", "", msg.personId, False)
 
             if msg.files:
                 for url in msg.files:
                     file_metadata = self.file_details(url)
                     attachments[url] = file_metadata
+
+            processed_messages.append(msg)
 
         if reverse_order:
             repeat_indeces = [len(processed_messages)-i for i in repeat_indeces]
@@ -237,7 +246,7 @@ class WebexTeamsArchiver:
                                          download_avatars, repeat_indeces, timestamp_format)
 
         if text_format:
-            self._create_text_transcript(processed_messages, attachments, timestamp_format)
+            self._create_text_transcript(processed_messages, attachments, people, timestamp_format)
 
         if download_attachments:
             self._download_files("attachments", attachments, download_workers)
@@ -313,7 +322,7 @@ class WebexTeamsArchiver:
         else:
             self.messages = self.sdk.messages.list(room_id)
 
-    def _create_text_transcript(self, messages: list, attachments: dict,
+    def _create_text_transcript(self, messages: list, attachments: dict, people: dict,
                                 timestamp_format: str) -> None:
         """Writes room messages to a text file."""
 
@@ -323,6 +332,7 @@ class WebexTeamsArchiver:
             room_creator=self.room_creator,
             messages=messages,
             attachments=attachments,
+            people=people,
             timestamp_format=timestamp_format,
         )
 

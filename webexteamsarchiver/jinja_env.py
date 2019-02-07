@@ -27,7 +27,7 @@ __all__ = ['env', 'sanitize_name']
 
 
 def filesize_format(size_bytes):
-    is not str(size_bytes).isdigit():
+    if not str(size_bytes).isdigit():
         return 0
 
     return size(int(size_bytes), system=alternative)
