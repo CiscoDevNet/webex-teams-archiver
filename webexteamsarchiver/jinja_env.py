@@ -55,7 +55,8 @@ def datetime_format(date: datetime, format: str) -> str:
 
 
 def sanitize_name(text: str) -> str:
-    return re.sub('[^A-Za-z0-9]+', '_', text)
+    text = str(text).strip().replace(' ', '_')
+    return re.sub(r'(?u)[^-\w.]', '', text)
 
 
 env = jinja2.Environment(

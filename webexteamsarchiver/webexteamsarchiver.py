@@ -99,10 +99,10 @@ class WebexTeamsArchiver:
             )
             raise MalformedResponse(message)
 
-        return File(sanitize_name(r.headers.get("Content-Disposition", "")),
+        return File(r.headers.get("Content-Disposition", ""),
                     r.headers.get("Content-Length", 0),
                     r.headers.get("Content-Type", ""),
-                    filename_re.group(1),
+                    sanitize_name(filename_re.group(1)),
                     False)
 
     def archive_room(self, room_id: str, text_format: bool = True, html_format: bool = True,
@@ -244,18 +244,23 @@ class WebexTeamsArchiver:
         if html_format:
             self._create_html_transcript(processed_messages, attachments, people,
                                          download_avatars, repeat_indeces, timestamp_format)
-
+            logger.debug("HTML transcript completed.")
+        
         if text_format:
             self._create_text_transcript(processed_messages, attachments, people, timestamp_format)
-
-        if download_attachments:
-            self._download_files("attachments", attachments, download_workers)
-
-        if download_avatars:
-            self._download_files("avatars", avatars, download_workers)
+            logger.debug("Text transcript completed.")
 
         if json_format:
             self._create_json_transcript(processed_messages)
+            logger.debug("JSON transcript completed.")
+
+        if download_attachments:
+            self._download_files("attachments", attachments, download_workers)
+            logger.debug("Attachments download completed.")
+
+        if download_avatars:
+            self._download_files("avatars", avatars, download_workers)
+            logger.debug("Avatars download completed.")
 
         # Write space information to json file
         with open(os.path.join(os.getcwd(), self.archive_folder_name, f"space_details.json"), "w", encoding="utf-8") as fh:
