@@ -1,5 +1,5 @@
 <div style="padding-left: 20px;">
-    <h4>{{ room.title }}</h4>
+    <h4>{{ room.title|e }}</h4>
     Created by <a href="mailto:{{ room_creator.emails[0] }}" alt="{{ room_creator.id }}">{{ room_creator.displayName }}</a> on {{ room.created|datetime_format(timestamp_format) }}{% if room.lastActivity %} and last had activity on {{ room.lastActivity|datetime_format(timestamp_format) }}{% endif %}.<br />
 </div>
 <div>
@@ -8,7 +8,7 @@
         <div class="activity-item" data-group-pos="{% if loop.index-1 in repeat_indeces %}additional{% else %}start{% endif %}"><button class="cui-button cui-button--none avatar-wrapper activity-item-avatarWrapper" alt="{{ people[msg.personId].displayName }} - {% if msg.personEmail %}{{msg.personEmail}}{% else %}{{ people[msg.personId].emails[0] }}{% endif %}" type="button" aria-label="{{ people[msg.personId].displayName }} - {% if msg.personEmail %}{{msg.personEmail}}{% else %}{{ people[msg.personId].emails[0] }}{% endif %}" tabindex="0" title="{{ people[msg.personId].displayName }} - {% if msg.personEmail %}{{msg.personEmail}}{% else %}{{ people[msg.personId].emails[0] }}{% endif %}"><span class="cui-button__children" style="opacity: 1;"><div class="cui-avatar cui-avatar--36" title="{{ people[msg.personId].displayName }} - {% if msg.personEmail %}{{msg.personEmail}}{% else %}{{ people[msg.personId].emails[0] }}{% endif %}">{% if people[msg.personId].avatar %}<img alt="" class="cui-avatar__img" draggable="false" src="{% if download_avatars %}./avatars/{{ msg.personId }}{% else %}{{ people[msg.personId].avatar }}{% endif %}">{% else %}<span class="cui-avatar__letter">{{ people[msg.personId].displayName|person_letters }}</span>{% endif %}</div></span></button><span class="file-title"></span>
             <div class="content">
                 <div class="activity-item-sender-meta"><span class="activity-item-sender-meta__displayName" title="{{ people[msg.personId].displayName }} - {% if msg.personEmail %}{{msg.personEmail}}{% else %}{{ people[msg.personId].emails[0] }}{% endif %}">{{ people[msg.personId].displayName }}</span><span class="activity-item-sender-meta__publishedDate">{{ msg.created|datetime_format(timestamp_format) }}</span></div>
-                {% if msg.html %}<div class="activity-item--message">{{ msg.html }}</div>{% else %}<div class="activity-item--message">{{ msg.text|replace("\n", "<br/>") }}</div>{% endif %}
+                {% if msg.html %}<div class="activity-item--message">{{ msg.html }}</div>{% else %}<div class="activity-item--message">{{ msg.text|e|replace("\n", "<br/>") }}</div>{% endif %}
                 {% if msg.files %}
                 <div class="share">
                     <ul class="shareList">
