@@ -52,7 +52,7 @@ setup(
     name=PACKAGE_NAME,
     author='Felipe de Mello',
     author_email='fdemello@cisco.com',
-    version='0.8.6',
+    version='0.8.7',
     url='https://github.com/CiscoDevNet/webex-teams-archiver',
     description='Room archiver utility for Webex Teams',
     long_description=long_description,
