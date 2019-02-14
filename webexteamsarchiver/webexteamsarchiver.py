@@ -322,7 +322,7 @@ class WebexTeamsArchiver:
             else:
                 raise
 
-        if self.sdk.people.me().type == "bot":
+        if self.sdk.people.me().type == "bot" and self.room.type == "group":
             self.messages = self.sdk.messages.list(room_id, mentionedPeople="me")
         else:
             self.messages = self.sdk.messages.list(room_id)
