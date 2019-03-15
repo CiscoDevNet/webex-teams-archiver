@@ -23,7 +23,6 @@ import os
 import re
 import requests
 import shutil
-import tarfile
 import logging
 import json
 import datetime
@@ -128,6 +127,7 @@ class WebexTeamsArchiver:
                 download_avatars: Download avatar images.
                 download_workers: Number of download workers for downloading files.
                 timestamp_format: Timestamp strftime format.
+                file_format: Define the compressed file format (tgz, zip)
 
         Returns:
             Name of archive file.
@@ -147,6 +147,7 @@ class WebexTeamsArchiver:
         download_avatars = options.get("download_avatars", True)
         download_workers = options.get("download_workers", 15)
         timestamp_format = options.get("timestamp_format", "%Y-%m-%dT%H:%M:%S")
+        file_format = options.get("file_format", "gztar")
 
         self._gather_room_information(room_id)
 
@@ -155,15 +156,23 @@ class WebexTeamsArchiver:
         try:
             self._archive(reverse_order, download_attachments, download_avatars, download_workers,
                           text_format, html_format, json_format, timestamp_format)
-            self._compress_folder()
+            self._compress_folder(file_format)
         except Exception:
             self._tear_down_folder()
             raise
 
         if delete_folder:
             self._tear_down_folder()
+        
+        filename = ""
+        if file_format == "gztar":
+            filename = f"{self.archive_folder_name}.tgz"
+        elif file_format == "zip":
+            filename = f"{self.archive_folder_name}.zip"
+        else:
+            filename = f"{self.archive_folder_name}.tgz"
 
-        return f"{self.archive_folder_name}.tgz"
+        return filename
 
     def _archive(self, reverse_order: bool, download_attachments: bool,
                  download_avatars: bool, download_workers: int, text_format: bool,
@@ -398,10 +407,6 @@ class WebexTeamsArchiver:
             with open(os.path.join(os.getcwd(), self.archive_folder_name, folder_name, f"{filename}"), "wb") as f:
                 shutil.copyfileobj(r.raw, f)
 
-    def _compress_folder(self) -> None:
+    def _compress_folder(self, file_format: str) -> None:
         """Compress `archive_folder_name` folder as `archive_folder_name`.tgz"""
-
-        # https://stackoverflow.com/questions/2032403/how-to-create-
-        # full-compressed-tar-file-using-python
-        with tarfile.open(f"{self.archive_folder_name}.tgz", "w:gz") as tar:
-            tar.add(self.archive_folder_name)
+        make_archive(self.archive_folder_name, file_format, self.archive_folder_name)
