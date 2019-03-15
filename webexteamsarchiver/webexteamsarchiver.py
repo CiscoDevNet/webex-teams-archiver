@@ -409,4 +409,4 @@ class WebexTeamsArchiver:
 
     def _compress_folder(self, file_format: str) -> None:
         """Compress `archive_folder_name` folder as `archive_folder_name`.tgz"""
-        make_archive(self.archive_folder_name, file_format, self.archive_folder_name)
+        shutil.make_archive(self.archive_folder_name, file_format, self.archive_folder_name)
