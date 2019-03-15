@@ -127,7 +127,7 @@ class WebexTeamsArchiver:
                 download_avatars: Download avatar images.
                 download_workers: Number of download workers for downloading files.
                 timestamp_format: Timestamp strftime format.
-                file_format: Define the compressed file format (tgz, zip)
+                file_format: Define the compressed file format (tar.gz, zip)
 
         Returns:
             Name of archive file.
@@ -166,11 +166,11 @@ class WebexTeamsArchiver:
         
         filename = ""
         if file_format == "gztar":
-            filename = f"{self.archive_folder_name}.tgz"
+            filename = f"{self.archive_folder_name}.tar.gz"
         elif file_format == "zip":
             filename = f"{self.archive_folder_name}.zip"
         else:
-            filename = f"{self.archive_folder_name}.tgz"
+            filename = f"{self.archive_folder_name}.tar.gz"
 
         return filename
 
