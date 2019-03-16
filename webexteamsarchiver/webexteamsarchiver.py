@@ -23,7 +23,6 @@ import os
 import re
 import requests
 import shutil
-import tarfile
 import logging
 import json
 import datetime
@@ -108,8 +107,8 @@ class WebexTeamsArchiver:
     def archive_room(self, room_id: str, text_format: bool = True, html_format: bool = True,
                      json_format: bool = True, **options) -> str:
         """
-        Archives a Webex Teams room. This creates a file called roomTitle_roomId.tgz 
-        with the following contents:
+        Archives a Webex Teams room. This creates a file called roomTitle_roomId with the appropiate file extension
+        as defined by file_format param with the following contents:
         - roomTitle_roomId.txt - Text version of the conversations (if `text_format` is True)
         - roomTitle_roomId.html - HTML version of the conversations (if `html_format` is True)
         - files/ - Attachments added to the room (if `download_attachments` is True)
@@ -128,6 +127,7 @@ class WebexTeamsArchiver:
                 download_avatars: Download avatar images.
                 download_workers: Number of download workers for downloading files.
                 timestamp_format: Timestamp strftime format.
+                file_format: Archive format as supported by shutil.make_archive
 
         Returns:
             Name of archive file.
@@ -147,6 +147,7 @@ class WebexTeamsArchiver:
         download_avatars = options.get("download_avatars", True)
         download_workers = options.get("download_workers", 15)
         timestamp_format = options.get("timestamp_format", "%Y-%m-%dT%H:%M:%S")
+        file_format = options.get("file_format", "gztar")
 
         self._gather_room_information(room_id)
 
@@ -155,7 +156,7 @@ class WebexTeamsArchiver:
         try:
             self._archive(reverse_order, download_attachments, download_avatars, download_workers,
                           text_format, html_format, json_format, timestamp_format)
-            self._compress_folder()
+            filename = self._compress_folder(file_format)
         except Exception:
             self._tear_down_folder()
             raise
@@ -163,13 +164,13 @@ class WebexTeamsArchiver:
         if delete_folder:
             self._tear_down_folder()
 
-        return f"{self.archive_folder_name}.tgz"
+        return filename
 
     def _archive(self, reverse_order: bool, download_attachments: bool,
                  download_avatars: bool, download_workers: int, text_format: bool,
                  html_format: bool, json_format: bool, timestamp_format: str) -> None:
         """
-        Collects room messages and attachments using Webex Teams 
+        Collects room messages and attachments using Webex Teams
         APIs and writes them to text/html files.
         """
         # Structure: {"personId": webexteamssdk.models.immutable.Person}
@@ -245,7 +246,7 @@ class WebexTeamsArchiver:
             self._create_html_transcript(processed_messages, attachments, people,
                                          download_avatars, repeat_indeces, timestamp_format)
             logger.debug("HTML transcript completed.")
-        
+
         if text_format:
             self._create_text_transcript(processed_messages, attachments, people, timestamp_format)
             logger.debug("Text transcript completed.")
@@ -266,7 +267,7 @@ class WebexTeamsArchiver:
         with open(os.path.join(os.getcwd(), self.archive_folder_name, f"space_details.json"), "w", encoding="utf-8") as fh:
             space_details = {
                 "space": self.room.to_dict(),
-                "creator": self.room_creator._asdict() if isinstance(self.room_creator, UserNotFound) 
+                "creator": self.room_creator._asdict() if isinstance(self.room_creator, UserNotFound)
                                                        else self.room_creator.to_dict(),
             }
             json.dump(space_details, fh)
@@ -398,10 +399,6 @@ class WebexTeamsArchiver:
             with open(os.path.join(os.getcwd(), self.archive_folder_name, folder_name, f"{filename}"), "wb") as f:
                 shutil.copyfileobj(r.raw, f)
 
-    def _compress_folder(self) -> None:
-        """Compress `archive_folder_name` folder as `archive_folder_name`.tgz"""
-
-        # https://stackoverflow.com/questions/2032403/how-to-create-
-        # full-compressed-tar-file-using-python
-        with tarfile.open(f"{self.archive_folder_name}.tgz", "w:gz") as tar:
-            tar.add(self.archive_folder_name)
+    def _compress_folder(self, file_format: str) -> str:
+        """Compress `archive_folder_name` folder with the format defined by file_format param"""
+        return shutil.make_archive(self.archive_folder_name, file_format, self.archive_folder_name)
