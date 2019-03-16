@@ -107,8 +107,8 @@ class WebexTeamsArchiver:
     def archive_room(self, room_id: str, text_format: bool = True, html_format: bool = True,
                      json_format: bool = True, **options) -> str:
         """
-        Archives a Webex Teams room. This creates a file called roomTitle_roomId with the appropiate file extension
-        as defined by file_format param with the following contents:
+        Archives a Webex Teams room. This creates a file called roomTitle_timestamp_roomId with the
+        appropriate file extension as defined by file_format param with the following contents:
         - roomTitle_roomId.txt - Text version of the conversations (if `text_format` is True)
         - roomTitle_roomId.html - HTML version of the conversations (if `html_format` is True)
         - files/ - Attachments added to the room (if `download_attachments` is True)
