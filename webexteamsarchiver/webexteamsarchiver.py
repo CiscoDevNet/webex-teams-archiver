@@ -306,7 +306,7 @@ class WebexTeamsArchiver:
 
         self.room = self.sdk.rooms.get(room_id)
 
-        timestamp = datetime.datetime.now().strftime("%Y-%m-%d--%H-%M-%S")
+        timestamp = datetime.datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
         self.archive_folder_name = f"{sanitize_name(self.room.title)}_{timestamp}_{room_id}"
 
         try:
