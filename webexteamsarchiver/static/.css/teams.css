@@ -1,0 +1,99 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto:300,400');
+
+body{
+    font-family: 'Roboto', sans-serif;
+    font-weight: 300;
+    /* -webkit-font-smoothing: antialiased; */
+}
+
+a{
+    color: #05a1bf !important;
+    -webkit-font-smoothing: antialiased;
+}
+
+h4 {
+    font-weight: 300;
+}
+
+/* text */
+
+#activities .activity-item {
+    display: flex;
+    -ms-flex-align: start;
+    align-items: flex-start;
+    margin-top: 1em;
+}
+
+.cui-button.cui-button--none {
+    border-color: hsla(0, 0%, 90%, 0.88);
+    border-radius: 50px;
+    padding: 0;
+    min-width: 0;
+    margin-right: 17px;
+}
+
+.cui-avatar.cui-avatar--36 {
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: .7875rem;
+    line-height: 1.125rem;
+}
+
+.cui-avatar .cui-avatar__letter {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    border-radius: 50px;
+    background-color: hsla(0, 0%, 90%, 0.88);
+}
+
+.activity-item-sender-meta{
+    font-size: 14px;
+    color: #6b6b6b;
+    margin-bottom: 0.2em;
+}
+
+.activity-item-sender-meta__publishedDate {
+    margin-left: 16px;
+}
+
+spark-mention {
+    color: #969696;
+}
+
+#activities .activity-item .content {
+    padding: 0px 4px;
+    min-width: 250px!important;
+    max-width: 90%;
+    width: 100%;  
+}
+/* ----------------- */
+
+/* Files-images */
+.shareList{
+    list-style: none;
+    margin: 10px 0;
+    padding: 0;
+}
+
+img {
+    max-width: 100%;
+}
+
+.mid-dot{
+    margin-right: 10px;
+}
+
+.chip-info{
+    margin-top: 15px;
+    padding: 11px;
+    background-color: #f5f5f5;
+    font-size: 14px;
+    border-radius: 5px;
+    width: 50%;
+    color: #6b6b6b;
+}
+/* ---------------------- */
+
