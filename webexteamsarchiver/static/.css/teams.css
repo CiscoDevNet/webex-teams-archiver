@@ -2,8 +2,7 @@
 
 body{
     font-family: 'Roboto', sans-serif !important;
-    font-weight: 300;
-    /* -webkit-font-smoothing: antialiased; */
+    font-weight: 300 !important;
 }
 
 a{
