@@ -47,6 +47,12 @@ h4 {
     background-color: hsla(0, 0%, 90%, 0.88);
 }
 
+
+.cui-avatar .cui-avatar__img {
+      border-radius: 50%;
+}
+
+
 .activity-item-sender-meta{
     font-size: 14px;
     color: #6b6b6b;
