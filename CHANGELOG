@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+0.9.1: 2019-09-02
+-----------------
+New Features:
+- Added our own CSS and fonts to enable a true offline archive.
+
 0.2.1: 2018-09-26
 -----------------
 Fixes:
