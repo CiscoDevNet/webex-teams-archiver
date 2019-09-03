@@ -53,9 +53,7 @@ Below is an example of a simple room that got archived.
 
 Note 1: The HTML version of the archive requires Internet connectivity because of the CSS, which is not packaged with the archive because of licensing conflicts.
 
-Note 2: Some older spaces were affected by the Webex Teams 2018 outage which may cause the archiver to crash. This is pending a workaround_ from the SDK.
-
-Note 3: Please note that use of the Webex Teams Archiver may violate the retention policy, if any, applicable to your use of Webex Teams.
+Note 2: Please note that use of the Webex Teams Archiver may violate the retention policy, if any, applicable to your use of Webex Teams.
 
 Installation
 ------------
@@ -109,6 +107,8 @@ In addition, the `options` kwargs supports the following additional options toda
 +----------------------+-------------------+---------------------------------------------------+
 | timestamp_format     | %Y-%m-%dT%H:%M:%S | Timestamp strftime format                         |
 +----------------------+-------------------+---------------------------------------------------+
+| file_format          | gztar             | Archive file format_                              |
++----------------------+-------------------+---------------------------------------------------+
 
 Questions, Support & Discussion
 -------------------------------
@@ -125,4 +125,4 @@ webexteamsarchiver_ is a *community developed* project. Code contributions are w
 
 .. _webexteamsarchiver: https://github.com/CiscoDevNet/webex-teams-archiver
 .. _issues: https://github.com/CiscoDevNet/webex-teams-archiver/issues
-.. _workaround: https://github.com/CiscoDevNet/webexteamssdk/issues/70
+.. _format: https://docs.python.org/3/library/shutil.html#shutil.make_archive

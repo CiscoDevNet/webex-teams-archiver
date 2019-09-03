@@ -1,20 +1,22 @@
 <html>
-    {% include "header.html" %}
-    <body class="roskilde" lang="en_us">
-        <main id="squared">
-            <div style="display: flex; flex-direction: column; height: 100%%;">
-                <div id="main-wrapper">
-                    <div id="container">
-                        <div id="main">
-                            <div class="content-column-panel">
-                                <div class="activity-section-wrapper">
-                                    <div id="activities">
-                                        <div class="activities-inner-wrapper">
-                                            <div class="activities-chat-wrapper activity-section--withBorder">
-                                                <div class="activity-body">
-                                                    <div class="activity-body-inner">
-                                                        <div class="activity-list" id="activity-list">
-                                                            <div class="room-content">
+{% include "header.html" %}
+
+<body class="roskilde" lang="en_us">
+    <main id="squared">
+        <div style="display: flex; flex-direction: column; height: 100%;">
+            <div id="main-wrapper">
+                <div id="container">
+                    <div id="main">
+                        <div class="content-column-panel">
+                            <div class="activity-section-wrapper">
+                                <div id="activities">
+                                    <div class="activities-inner-wrapper">
+                                        <div class="activities-chat-wrapper activity-section--withBorder">
+                                            <div class="activity-body">
+                                                <div class="activity-body-inner">
+                                                    <div class="activity-list" id="activity-list">
+                                                        <div class="room-content">
+                                                            <div class="container mt-5">
                                                                 {% include "room_content.html" %}
                                                             </div>
                                                         </div>
@@ -29,6 +31,8 @@
                     </div>
                 </div>
             </div>
-        </main>
-    </body>
+        </div>
+    </main>
+</body>
+
 </html>
