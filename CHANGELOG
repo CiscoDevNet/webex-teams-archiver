@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+0.9.2: 2019-09-02
+-----------------
+Fixes:
+- Removed .DS_Store files from repo.
+
 0.9.1: 2019-09-02
 -----------------
 New Features:
