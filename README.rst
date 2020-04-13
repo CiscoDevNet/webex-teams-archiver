@@ -25,7 +25,7 @@ Example
     personal_token = "mytoken"
     archiver = WebexTeamsArchiver(personal_token)
     
-    # room id from https://developer.webex.com/docs/api/v1/rooms 
+    # room id from https://developer.webex.com/docs/api/v1/rooms/list-rooms
     room_id = "Y2lzY29zcGFyazovL3VzL1JPT00vd2ViZXh0ZWFtc2FyY2hpdmVy"
     archiver.archive_room(room_id)
     
