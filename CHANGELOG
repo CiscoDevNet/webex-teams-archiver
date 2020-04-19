@@ -1,6 +1,16 @@
 CHANGELOG
 =========
 
+0.10.0: 2020-04-18
+-----------------
+New Features:
+- Support for threads.
+- Added a `compress_folder` option to allow users to choose whether or not to create the compressed archive.
+- Removed the `overwrite_folder` option since it had effect.
+
+Fixes:
+- Text archives were missing a space between the e-mail and timestamp.
+
 0.9.2: 2019-09-02
 -----------------
 Fixes:

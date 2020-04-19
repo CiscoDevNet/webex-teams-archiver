@@ -1,6 +1,6 @@
 """Jinja Configuration.
 
-Copyright (c) 2018-2019 Cisco and/or its affiliates.
+Copyright (c) 2018-2020 Cisco and/or its affiliates.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -36,7 +36,7 @@ def filesize_format(size_bytes):
 def person_letters(display_name: str) -> str:
     if not display_name:
         return "Person Not Found"
-        
+
     output = ""
     for name in display_name.upper().split():
         output += name[0]
@@ -59,6 +59,19 @@ def sanitize_name(text: str) -> str:
     return re.sub(r'(?u)[^-\w.]', '', text)
 
 
+def format_msg(text: str, thread: bool) -> str:
+    spaces = " " * 2
+    if thread:
+        spaces *= 3
+
+    if isinstance(text, str) and "\n" in text:
+        text = re.sub("\\n", f"\\n{spaces}", text)
+        text = f"{spaces}{text}"
+        return f"\n{text}"
+
+    return text
+
+
 env = jinja2.Environment(
     autoescape=False,
     trim_blocks=True,
@@ -71,3 +84,4 @@ env.filters['filesize_format'] = filesize_format
 env.filters['person_letters'] = person_letters
 env.filters['datetime_format'] = datetime_format
 env.filters['sanitize_name'] = sanitize_name
+env.filters['format_msg'] = format_msg

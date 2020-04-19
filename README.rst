@@ -34,13 +34,13 @@ Produces the following files:
 .. code-block:: bash
 
     $ ls 
-    Title_Timestamp_Y2lzY29zcGFyazovL3VzL1JPT00vd2ViZXh0ZWFtc2FyY2hpdmVy.tgz
-    Title_Timestamp_Y2lzY29zcGFyazovL3VzL1JPT00vd2ViZXh0ZWFtc2FyY2hpdmVy
+    Title_Timestamp.tgz
+    Title_Timestamp
 
-    $ ls Title_Timestamp_Y2lzY29zcGFyazovL3VzL1JPT00vd2ViZXh0ZWFtc2FyY2hpdmVy/
-    Title_Timestamp_Y2lzY29zcGFyazovL3VzL1JPT00vd2ViZXh0ZWFtc2FyY2hpdmVy.html
-    Title_Timestamp_Y2lzY29zcGFyazovL3VzL1JPT00vd2ViZXh0ZWFtc2FyY2hpdmVy.json
-    Title_Timestamp_Y2lzY29zcGFyazovL3VzL1JPT00vd2ViZXh0ZWFtc2FyY2hpdmVy.txt
+    $ ls Title_Timestamp/
+    Title_Timestamp.html
+    Title_Timestamp.json
+    Title_Timestamp.txt
     attachments/
     avatars/
     space_details.json
@@ -93,7 +93,7 @@ In addition, the `options` kwargs supports the following additional options toda
 +----------------------+-------------------+---------------------------------------------------+ 
 | Argument             | Default Value     | Description                                       | 
 +======================+===================+===================================================+
-| overwrite_folder     | True              | Overwrite the archive folder if it already exists |
+| compress_folder      | True              | Compress archive folder                           |
 +----------------------+-------------------+---------------------------------------------------+
 | delete_folder        | False             | Delete the archive folder when done               |
 +----------------------+-------------------+---------------------------------------------------+
@@ -120,7 +120,7 @@ Contribution
 
 webexteamsarchiver_ is a *community developed* project. Code contributions are welcome via PRs!
 
-*Copyright (c) 2018-2019 Cisco and/or its affiliates.*
+*Copyright (c) 2018-2020 Cisco and/or its affiliates.*
 
 
 .. _webexteamsarchiver: https://github.com/CiscoDevNet/webex-teams-archiver

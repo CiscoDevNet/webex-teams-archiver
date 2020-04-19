@@ -1,64 +1,155 @@
 <div style="padding-left: 20px;">
     <h4>{{ room.title|e }}</h4>
-    Created by <a href="mailto:{{ room_creator.emails[0] }}" alt="{{ room_creator.id }}">{{ room_creator.displayName }}</a> on {{ room.created|datetime_format(timestamp_format) }}{% if room.lastActivity %} and last had activity on {{ room.lastActivity|datetime_format(timestamp_format) }}{% endif %}.<br />
+    Created by <a href="mailto:{{ room_creator.emails[0] }}" alt="{{ room_creator.id }}">{{ room_creator.displayName }}</a> on {{ room.created|datetime_format(timestamp_format) }}{% if room.lastActivity %} and last had activity on {{ room.lastActivity|datetime_format(timestamp_format)
+    }}{% endif %}.<br />
 </div>
-<div>
+<div id="activities">
     <div id="activity-items" tabindex="0" role="button">
         {% for msg in messages %}
-        <div class="activity-item" data-group-pos="{% if loop.index-1 in repeat_indeces %}additional{% else %}start{% endif %}"><button class="cui-button cui-button--none avatar-wrapper activity-item-avatarWrapper" alt="{{ people[msg.personId].displayName }} - {% if msg.personEmail %}{{msg.personEmail}}{% else %}{{ people[msg.personId].emails[0] }}{% endif %}" type="button" aria-label="{{ people[msg.personId].displayName }} - {% if msg.personEmail %}{{msg.personEmail}}{% else %}{{ people[msg.personId].emails[0] }}{% endif %}" tabindex="0" title="{{ people[msg.personId].displayName }} - {% if msg.personEmail %}{{msg.personEmail}}{% else %}{{ people[msg.personId].emails[0] }}{% endif %}"><span class="cui-button__children" style="opacity: 1;"><div class="cui-avatar cui-avatar--36" title="{{ people[msg.personId].displayName }} - {% if msg.personEmail %}{{msg.personEmail}}{% else %}{{ people[msg.personId].emails[0] }}{% endif %}">{% if people[msg.personId].avatar %}<img alt="" class="cui-avatar__img" draggable="false" src="{% if download_avatars %}./avatars/{{ msg.personId }}{% else %}{{ people[msg.personId].avatar }}{% endif %}">{% else %}<span class="cui-avatar__letter">{{ people[msg.personId].displayName|person_letters }}</span>{% endif %}</div></span></button><span class="file-title"></span>
-            <div class="content">
-                <div class="activity-item-sender-meta"><span class="activity-item-sender-meta__displayName" title="{{ people[msg.personId].displayName }} - {% if msg.personEmail %}{{msg.personEmail}}{% else %}{{ people[msg.personId].emails[0] }}{% endif %}">{{ people[msg.personId].displayName }}</span><span class="activity-item-sender-meta__publishedDate">{{ msg.created|datetime_format(timestamp_format) }}</span></div>
-                {% if msg.html %}<div class="activity-item--message">{{ msg.html }}</div>{% else %}<div class="activity-item--message">{{ msg.text|e|replace("\n", "<br/>") }}</div>{% endif %}
-                {% if msg.files %}
-                <div class="share">
-                    <ul class="shareList">
-                        {% for url in msg.files %}
-                            {% if attachments[url].deleted == false %}
-                                {% if attachments[url].content_type.startswith('image/') %}
-                                    <li class="shareItem shareImage">
-                                        <div class="activity-content-item-section">
-                                            <div class="activity-content-item-image-holder" style="height: auto;">
-                                                <div class="activity-content-item-image-wrapper">
-                                                    <img alt="File" class="" draggable="false" src="./attachments/{{ attachments[url].filename }}" style="width: auto; height: auto;" href="./attachments/{{ attachments[url].filename }}" data-featherlight="image">
-                                                </div>
-                                            </div>
-                                            <div class="chip chip--lg chip--dark">
-                                                <div class="chip-info">
-                                                    <span class="chip-text chip-text--primary">Image File<span class="mid-dot"></span><a title="Download" download="{{ attachments[url].filename }}" href="./attachments/{{ attachments[url].filename }}">{{ attachments[url].filename }}</a></span>
-                                                    <span class="chip-text chip-text--secondary" title="{{ attachments[url].content_type }}">
-                                                        <div class="file-chip-secondary">
-                                                            <span class="file-chip-meta-size">{{ attachments[url].content_length|filesize_format }}</span>
-                                                            <span class="mid-dot"></span>
-                                                            <span class="file-chip-meta-fileType">{{ attachments[url].content_type }}</span>
+            {% if not msg.parentId %}
+                <div class="activity-item" data-group-pos="start">
+                    <button class="cui-button cui-button--none avatar-wrapper activity-item-avatarWrapper" alt="{{ people.get(msg.personId, {'displayName': 'Person Not Found'}).displayName }} - {% if msg.personEmail %}{{msg.personEmail}}{% else %}{{ people.get(msg.personId, {'emails': ['unknown']}).emails[0] }}{% endif %}" type="button" aria-label="{{ people.get(msg.personId, {'displayName': 'Person Not Found'}).displayName }} - {% if msg.personEmail %}{{msg.personEmail}}{% else %}{{ people.get(msg.personId, {'emails': ['unknown']}).emails[0] }}{% endif %}" tabindex="0" title="{{ people.get(msg.personId, {'displayName': 'Person Not Found'}).displayName }} - {% if msg.personEmail %}{{msg.personEmail}}{% else %}{{ people.get(msg.personId, {'emails': ['unknown']}).emails[0] }}{% endif %}">
+                        <span class="cui-button__children" style="opacity: 1;">
+                            <div class="cui-avatar cui-avatar--36" title="{{ people.get(msg.personId, {'displayName': 'Person Not Found'}).displayName }} - {% if msg.personEmail %}{{msg.personEmail}}{% else %}{{ people.get(msg.personId, {'emails': ['unknown']}).emails[0] }}{% endif %}">{% if people[msg.personId].avatar %}<img alt="" class="cui-avatar__img" draggable="false" src="{% if download_avatars %}./avatars/{{ msg.personId }}{% else %}{{ people[msg.personId].avatar }}{% endif %}">{% else %}<span class="cui-avatar__letter">{{ people.get(msg.personId, {'displayName': 'Person Not Found'}).displayName|person_letters }}</span>{% endif %}</div>
+                        </span>
+                    </button>
+                    <span class="file-title" />
+                    <div class="content">
+                        <div class="activity-item-sender-meta">
+                            <span class="activity-item-sender-meta__displayName" title="{{ people.get(msg.personId, {'displayName': 'Person Not Found'}).displayName }} - {% if msg.personEmail %}{{msg.personEmail}}{% else %}{{ people.get(msg.personId, {'emails': ['unknown']}).emails[0] }}{% endif %}">{{ people.get(msg.personId, {'displayName': 'Person Not Found'}).displayName }}</span>
+                            <span class="activity-item-sender-meta__publishedDate">{{ msg.created|datetime_format(timestamp_format) }}</span>
+                        </div>
+                        {% if msg.html %}
+                            <div class="activity-item--message">{{ msg.html }}</div>
+                        {% else %}
+                            <div class="activity-item--message">{{ msg.text|e|replace("\n", "<br/>") }}</div>
+                        {% endif %} 
+                        {% if msg.files %}
+                            <div class="share">
+                                <ul class="shareList">
+                                    {% for url in msg.files %} 
+                                        {% if attachments[url].deleted == false %} 
+                                            {% if attachments[url].content_type.startswith('image/') %}
+                                                <li class="shareItem shareImage">
+                                                    <div class="activity-content-item-section">
+                                                        <div class="activity-content-item-image-holder" style="height: auto;">
+                                                            <div class="activity-content-item-image-wrapper">
+                                                                <img alt="File" class="" draggable="false" src="./attachments/{{ attachments[url].filename }}" style="width: auto; height: auto;" href="./attachments/{{ attachments[url].filename }}" data-featherlight="image">
+                                                            </div>
                                                         </div>
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </li>
-                                {% else %}
-                                    <li class="shareItem shareGeneral">
-                                        <div class="chip chip--lg chip--dark">
-                                            <div class="chip-info">
-                                                <span class="chip-text chip-text--primary">File<span class="mid-dot"></span><a title="Download" download="{{ attachments[url].filename }}" href="./attachments/{{ attachments[url].filename }}">{{ attachments[url].filename }}</a></span>
-                                                <span class="chip-text chip-text--secondary" title="{{ attachments[url].content_type }}">
-                                                    <div class="file-chip-secondary">
-                                                        <span class="file-chip-meta-size">{{ attachments[url].content_length|filesize_format }}</span>
-                                                        <span class="mid-dot"></span>
-                                                        <span class="file-chip-meta-fileType">{{ attachments[url].content_type }}</span>
+                                                        <div class="chip chip--lg chip--dark">
+                                                            <div class="chip-info">
+                                                                <span class="chip-text chip-text--primary">Image File<span class="mid-dot"></span><a title="Download" download="{{ attachments[url].filename }}" href="./attachments/{{ attachments[url].filename }}">{{ attachments[url].filename }}</a></span>
+                                                                <span class="chip-text chip-text--secondary" title="{{ attachments[url].content_type }}">
+                                                                    <div class="file-chip-secondary">
+                                                                        <span class="file-chip-meta-size">{{ attachments[url].content_length|filesize_format }}</span>
+                                                                        <span class="mid-dot"></span>
+                                                                        <span class="file-chip-meta-fileType">{{ attachments[url].content_type }}</span>
+                                                                    </div>
+                                                                </span>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </li>
-                                {% endif %}
-                            {% endif %}
-                        {% endfor %}
-                    </ul>
+                                                </li>
+                                            {% else %}
+                                                <li class="shareItem shareGeneral">
+                                                    <div class="chip chip--lg chip--dark">
+                                                        <div class="chip-info">
+                                                            <span class="chip-text chip-text--primary">File<span class="mid-dot"></span><a title="Download" download="{{ attachments[url].filename }}" href="./attachments/{{ attachments[url].filename }}">{{ attachments[url].filename }}</a></span>
+                                                            <span class="chip-text chip-text--secondary" title="{{ attachments[url].content_type }}">
+                                                                <div class="file-chip-secondary">
+                                                                    <span class="file-chip-meta-size">{{ attachments[url].content_length|filesize_format }}</span>
+                                                                    <span class="mid-dot"></span>
+                                                                    <span class="file-chip-meta-fileType">{{ attachments[url].content_type }}</span>
+                                                                </div>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            {% endif %} 
+                                        {% endif %} 
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
+
+                {% if msg.id in threads and threads[msg.id]|length > 0 %}
+                    {% for reply in threads[msg.id] %}
+                        <div class="activity activity--reply">
+                            <div class="activity-item">
+                                <div class="activity-item-left-child">
+                                    <button class="cui-button cui-button--none avatar-wrapper activity-item-avatarWrapper" alt="{{ people.get(reply.personId, {'displayName': 'Person Not Found'}).displayName }} - {% if reply.personEmail %}{{reply.personEmail}}{% else %}{{ people.get(reply.personId, {'emails': ['unknown']}).emails[0] }}{% endif %}" type="button" aria-label="{{ people.get(reply.personId, {'displayName': 'Person Not Found'}).displayName }} - {% if reply.personEmail %}{{reply.personEmail}}{% else %}{{ people.get(reply.personId, {'emails': ['unknown']}).emails[0] }}{% endif %}" tabindex="0" title="{{ people.get(reply.personId, {'displayName': 'Person Not Found'}).displayName }} - {% if reply.personEmail %}{{reply.personEmail}}{% else %}{{ people.get(reply.personId, {'emails': ['unknown']}).emails[0] }}{% endif %}">
+                                        <span class="cui-button__children" style="opacity: 1;">
+                                            <div class="cui-avatar cui-avatar--36" title="{{ people.get(reply.personId, {'displayName': 'Person Not Found'}).displayName }} - {% if reply.personEmail %}{{reply.personEmail}}{% else %}{{ people.get(reply.personId, {'emails': ['unknown']}).emails[0] }}{% endif %}">{% if people[reply.personId].avatar %}<img alt="" class="cui-avatar__img" draggable="false" src="{% if download_avatars %}./avatars/{{ reply.personId }}{% else %}{{ people[reply.personId].avatar }}{% endif %}">{% else %}<span class="cui-avatar__letter">{{ people.get(reply.personId, {'displayName': 'Person Not Found'}).displayName|person_letters }}</span>{% endif %}</div>
+                                        </span>
+                                    </button>
+                                    <span class="file-title" />
+                                </div>
+                                <div class="content">
+                                    <div class="activity-item-sender-meta"><span class="activity-item-sender-meta__displayName" title="{{ people.get(reply.personId, {'displayName': 'Person Not Found'}).displayName }} - {% if reply.personEmail %}{{reply.personEmail}}{% else %}{{ people.get(reply.personId, {'emails': ['unknown']}).emails[0] }}{% endif %}">{{ people.get(reply.personId, {'displayName': 'Person Not Found'}).displayName }}</span>
+                                        <span class="activity-item-sender-meta__publishedDate">{{ reply.created|datetime_format(timestamp_format) }}</span>
+                                    </div>
+                                    {% if reply.html %}
+                                        <div class="activity-item--message">{{ reply.html }}</div>
+                                    {% else %}
+                                        <div class="activity-item--message">{{ reply.text|e|replace("\n", "<br/>") }}</div>
+                                    {% endif %} 
+                                    {% if reply.files %}
+                                        <div class="share">
+                                            <ul class="shareList">
+                                                {% for url in reply.files %} 
+                                                    {% if attachments[url].deleted == false %} 
+                                                        {% if attachments[url].content_type.startswith('image/') %}
+                                                            <li class="shareItem shareImage">
+                                                                <div class="activity-content-item-section">
+                                                                    <div class="activity-content-item-image-holder" style="height: auto;">
+                                                                        <div class="activity-content-item-image-wrapper">
+                                                                            <img alt="File" class="" draggable="false" src="./attachments/{{ attachments[url].filename }}" style="width: auto; height: auto;" href="./attachments/{{ attachments[url].filename }}" data-featherlight="image">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="chip chip--lg chip--dark">
+                                                                        <div class="chip-info">
+                                                                            <span class="chip-text chip-text--primary">Image File<span class="mid-dot"></span><a title="Download" download="{{ attachments[url].filename }}" href="./attachments/{{ attachments[url].filename }}">{{ attachments[url].filename }}</a></span>
+                                                                            <span class="chip-text chip-text--secondary" title="{{ attachments[url].content_type }}">
+                                                                                <div class="file-chip-secondary">
+                                                                                    <span class="file-chip-meta-size">{{ attachments[url].content_length|filesize_format }}</span>
+                                                                                    <span class="mid-dot"></span>
+                                                                                    <span class="file-chip-meta-fileType">{{ attachments[url].content_type }}</span>
+                                                                                </div>
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </li>
+                                                        {% else %}
+                                                            <li class="shareItem shareGeneral">
+                                                                <div class="chip chip--lg chip--dark">
+                                                                    <div class="chip-info">
+                                                                        <span class="chip-text chip-text--primary">File<span class="mid-dot"></span><a title="Download" download="{{ attachments[url].filename }}" href="./attachments/{{ attachments[url].filename }}">{{ attachments[url].filename }}</a></span>
+                                                                        <span class="chip-text chip-text--secondary" title="{{ attachments[url].content_type }}">
+                                                                            <div class="file-chip-secondary">
+                                                                                <span class="file-chip-meta-size">{{ attachments[url].content_length|filesize_format }}</span>
+                                                                                <span class="mid-dot"></span>
+                                                                                <span class="file-chip-meta-fileType">{{ attachments[url].content_type }}</span>
+                                                                            </div>
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                            </li>
+                                                        {% endif %} 
+                                                    {% endif %} 
+                                                {% endfor %}
+                                            </ul>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
                 {% endif %}
-            </div>
-        </div>
+            {% endif %}
         {% endfor %}
     </div>
 </div>
