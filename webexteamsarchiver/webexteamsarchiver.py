@@ -57,13 +57,16 @@ class WebexTeamsArchiver:
 
     Args:
         access_token: User's personal Webex Teams API bearer token.
+        single_request_timeout: Timeout in seconds for the API requests.
+        special_token: The supplied access_token has access to all messages in a space.
 
     Raises:
         webexteamssdkException: An error occurred calling the Webex Teams API.
     """
 
-    def __init__(self, access_token: str, single_request_timeout: int = 60) -> None:
+    def __init__(self, access_token: str, single_request_timeout: int = 60, special_token: bool = False) -> None:
         self.access_token = access_token
+        self.special_token = special_token
         self.sdk = WebexTeamsAPI(
             self.access_token, single_request_timeout=single_request_timeout)
 
@@ -289,7 +292,7 @@ class WebexTeamsArchiver:
                 logger.error(e)
                 raise
 
-        if self.sdk.people.me().type == "bot" and self.room.type == "group":
+        if self.room.type == "group" and self.sdk.people.me().type == "bot" and not self.special_token:
             self.messages = self.sdk.messages.list(
                 room_id, mentionedPeople="me")
         else:

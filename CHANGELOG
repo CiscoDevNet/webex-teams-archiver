@@ -1,12 +1,17 @@
 CHANGELOG
 =========
 
+0.11.0: 2020-08-19
+-----------------
+New Features:
+- Added a initialization parameter for special tokens that have access to all messages in a space.
+
 0.10.0: 2020-04-18
 -----------------
 New Features:
 - Support for threads.
 - Added a `compress_folder` option to allow users to choose whether or not to create the compressed archive.
-- Removed the `overwrite_folder` option since it had effect.
+- Removed the `overwrite_folder` option since it had no effect.
 
 Fixes:
 - Text archives were missing a space between the e-mail and timestamp.
