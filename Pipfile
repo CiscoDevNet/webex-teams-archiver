@@ -9,8 +9,8 @@ verify_ssl = true
 webexteamssdk = "*"
 requests = "*"
 bump2version = "*"
-Jinja2 = "*"
 "hurry.filesize" = "*"
+Jinja2 = "==2.11.3"
 
 [requires]
 python_version = "3.7"

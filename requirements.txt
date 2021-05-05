@@ -1,5 +1,5 @@
 webexteamssdk
-jinja2
+jinja2==2.11.3
 requests
 hurry.filesize
 bump2version
