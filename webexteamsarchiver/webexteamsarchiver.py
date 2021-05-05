@@ -78,9 +78,6 @@ class WebexTeamsArchiver:
             url: The URL of the file found in the files list in the message.
             single_request_timeout: Webex API call single request timeout.
 
-        Raises:
-            MalformedResponse: Webex Teams API response did not contain expected data.
-
         Returns:
             File: Details about the file.
         """
@@ -100,10 +97,12 @@ class WebexTeamsArchiver:
                                     r.headers.get("Content-Disposition", ""), re.I)
 
             if not filename_re:
+                new_filename = re.sub(r'^.+/([^/]+)$', r'\1', url)
                 message = (
-                    f"Failed to find filename='' in {r.headers.get('Content-Disposition', '')} for url {url}"
+                    f"Set filename to '{new_filename}' in {r.headers.get('Content-Disposition', '')} for url {url}"
                 )
-                raise MalformedResponse(message)
+                logger.debug(message)
+                filename_re = re.search(r"filename=\"(.+?)\"", f"filename=\"{new_filename}\"", re.I)
 
             return File(r.headers.get("Content-Disposition", ""),
                         r.headers.get("Content-Length", 0),
