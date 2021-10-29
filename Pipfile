@@ -11,6 +11,7 @@ requests = "*"
 bump2version = "*"
 "hurry.filesize" = "*"
 Jinja2 = "==2.11.3"
+urllib3 = ">=1.26.5"
 
 [requires]
 python_version = "3.7"
