@@ -417,9 +417,15 @@ class WebexTeamsArchiver:
 
         # https://stackoverflow.com/questions/16694907/how-to-download-
         # large-file-in-python-with-requests-py
-        with requests.get(url, headers=headers, stream=True) as r:
-            with open(os.path.join(os.getcwd(), self.archive_folder_name, folder_name, f"{filename}"), "wb") as f:
-                shutil.copyfileobj(r.raw, f)
+        # Removing as it's not support in all requests versions
+        # with requests.get(url, headers=headers, stream=True) as r:
+        #     with open(os.path.join(os.getcwd(), self.archive_folder_name, folder_name, f"{filename}"), "wb") as f:
+        #         shutil.copyfileobj(r.raw, f)
+
+        r = requests.get(url, headers=headers, stream=True)
+        with open(os.path.join(os.getcwd(), self.archive_folder_name, folder_name, f"{filename}"), "wb") as f:
+            for chunk in r.iter_content(chunk_size=1024):
+                f.write(chunk)
 
     def _compress_folder(self, file_format: str) -> str:
         """Compress `archive_folder_name` folder with the format defined by file_format param"""
