@@ -3,3 +3,4 @@ jinja2==2.11.3
 requests
 hurry.filesize
 bump2version
+MarkupSafe==2.0.1
