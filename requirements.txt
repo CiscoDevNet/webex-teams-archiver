@@ -1,5 +1,6 @@
 webexteamssdk
 jinja2==2.11.3
 requests
+MarkupSafe==2.0.1
 hurry.filesize
 bump2version
