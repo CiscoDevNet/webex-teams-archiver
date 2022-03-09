@@ -1,17 +1,17 @@
 [[source]]
-name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
-
-[dev-packages]
+name = "pypi"
 
 [packages]
 webexteamssdk = "*"
 requests = "*"
-bump2version = "*"
 "hurry.filesize" = "*"
+bump2version = "*"
 Jinja2 = "==2.11.3"
-urllib3 = ">=1.26.5"
+MarkupSafe = "==2.0.1"
+
+[dev-packages]
 
 [requires]
-python_version = "3.7"
+python_version = "3.9"

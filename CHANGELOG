@@ -1,6 +1,12 @@
 CHANGELOG
 =========
 
+0.11.3: 2022-03-08
+-----------------
+Fixes:
+- Froze version for MarkupSafe in order to support Python 3.6
+
+
 0.11.2: 2021-10-29
 -----------------
 Fixes:
